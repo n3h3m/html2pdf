@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/zulumarketing/xhtml2pdf.svg?branch=master
+    :target: https://travis-ci.org/zulumarketing/xhtml2pdf
+
 *********
 xhtml2pdf
 *********
