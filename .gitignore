@@ -1,27 +1,70 @@
-*.pyc
-pisa.egg-info
 .project
 .pydevproject
 .pydevproject.bak
 .settings/
-.tox
-nosetests.xml
-PIL-1.1.7-py2.7-linux-x86_64.egg/
 bin/
-html5lib-0.90-py2.7.egg/
 include/
-lib/
 man/
-pyPdf-1.13-py2.7.egg/
-reportlab-2.5-py2.7-linux-x86_64.egg/
 tests/tmp/
-build/
-dist/
 testrender/output/
+testrender/reference/
 *.swp
-.coverage
-htmlcov/
 xhtml2pdf.egg-info
 *.pdf
 tests/_trial_temp/
 .idea/*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/

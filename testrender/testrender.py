@@ -1,5 +1,7 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
+
 import datetime
 import os
 import shutil
@@ -8,6 +10,9 @@ import glob
 import decimal
 from optparse import OptionParser
 from subprocess import Popen, PIPE
+
+os.chdir(os.path.split(os.path.abspath(__file__))[0])
+sys.path.insert(0, os.path.abspath(os.pardir))
 
 from xhtml2pdf import pisa
 
@@ -36,13 +41,13 @@ def render_pdf(filename, output_dir, options):
 def convert_to_png(infile, output_dir, options):
     if options.debug:
         print('Converting %s to PNG' % infile)
+    outfiles = []
     basename = os.path.basename(infile)
     filename = os.path.splitext(basename)[0]
-    outname = '%s.page%%0d.png' % filename
-    globname = '%s.page*.png' % filename
-    outfile = os.path.join(output_dir, outname)
-    exec_cmd(options, options.convert_cmd, '-density', '150', infile, outfile)
-    outfiles = glob.glob(os.path.join(output_dir, globname))
+    for outfile in glob.glob(os.path.join(output_dir, '{name}.page*.png'.format(name=filename))):
+        outfiles.append(outfile)
+        outfile = os.path.join(output_dir, outfile)
+        exec_cmd(options, options.convert_cmd, '-density', '150', infile, outfile)
     outfiles.sort()
     return outfiles
 
@@ -97,9 +102,7 @@ def render_file(filename, output_dir, ref_dir, options):
                 continue
             page['ref'] = copy_ref_image(refsrc, output_dir, options)
             page['ref_thumb'] = create_thumbnail(page['ref'], options)
-            page['diff'], page['diff_value'] = \
-                    create_diff_image(page['png'], page['ref'],
-                                      output_dir, options)
+            page['diff'], page['diff_value'] = create_diff_image(page['png'], page['ref'], output_dir, options)
             page['diff_thumb'] = create_thumbnail(page['diff'], options)
             if page['diff_value']:
                 diff_count += 1
@@ -165,25 +168,23 @@ def create_html_file(results, template_file, output_dir, options):
                             '</div>\n' % vars)
             else:
                 html.append('<div class="result-page">\n'
-                           '<h3>Page %(page)i</h3>\n'
-
-                           '<div class="result-img">\n'
-                           '<a href="%(png)s" class="png-file">'
-                           '<img src="%(png_thumb)s"/></a>\n'
-                           '</div>\n'
-
-                           '</div>\n' % vars)
+                            '<h3>Page %(page)i</h3>\n'
+                            '<div class="result-img">\n'
+                            '<a href="%(png)s" class="png-file">'
+                            '<img src="%(png_thumb)s"/></a>\n'
+                            '</div>\n'
+                            '</div>\n' % vars)
         html.append('</div>\n\n')
 
     now = datetime.datetime.now()
     title = 'xhtml2pdf Test Rendering Results, %s' % now.strftime('%c')
-    template = open(template_file, 'rb').read()
+    template = open(template_file, 'rb').read().decode()
     template = template.replace('%%TITLE%%', title)
     template = template.replace('%%RESULTS%%', '\n'.join(html))
 
     htmlfile = os.path.join(output_dir, 'index.html')
     outfile = open(htmlfile, 'wb')
-    outfile.write(template)
+    outfile.write(template.encode())
     outfile.close()
     return htmlfile
 
@@ -231,34 +232,32 @@ def main():
             sys.exit(1)
 
 
-parser = OptionParser(
-    usage='rendertest.py [options] [source_file] [source_file] ...',
-    description='Renders a single html source file or all files in the data '
-    'directory, converts them to PNG format and prepares a result '
-    'HTML file for comparing the output with an expected result')
+parser = OptionParser(usage='rendertest.py [options] [source_file] [source_file] ...',
+                      description='Renders a single html source file or all files in the data '
+                                  'directory, converts them to PNG format and prepares a result '
+                                  'HTML file for comparing the output with an expected result')
 parser.add_option('-s', '--source-dir', dest='source_dir', default='data/source',
-                  help=('Path to directory containing the html source files'))
+                  help='Path to directory containing the html source files')
 parser.add_option('-o', '--output-dir', dest='output_dir', default='output',
                   help='Path to directory for output files. CAREFUL: this '
-                  'directory will be deleted and recreated before rendering!')
+                       'directory will be deleted and recreated before rendering!')
 parser.add_option('-r', '--ref-dir', dest='ref_dir', default='data/reference',
                   help='Path to directory containing the reference images '
-                  'to compare the result with')
+                       'to compare the result with')
 parser.add_option('-t', '--template', dest='html_template',
                   default='data/template.html', help='Name of HTML template file')
-parser.add_option('-e', '--only-errors', dest='only_errors', action='store_true',
-                  default=False, help='Only include images in HTML file which '
-                  'differ from reference')
+parser.add_option('-e', '--only-errors', dest='only_errors', action='store_true', default=False,
+                  help='Only include images in HTML file which differ from reference')
 parser.add_option('-q', '--quiet', dest='quiet', action='store_true',
                   default=False, help='Try to be quiet')
-parser.add_option('--no-compare', dest='no_compare', action='store_true',
-                  default=False, help='Do not compare with reference image, '
-                  'only render to png')
+parser.add_option('--no-compare', dest='no_compare', action='store_true', default=False,
+                  help='Do not compare with reference image, only render to png')
 parser.add_option('-c', '--create-reference', dest='create_reference',
                   metavar='DIR',
-                  default=None, help='Do not output anything, render source to '
-                  'specified directory for reference. CAREFUL: this directory '
-                 'will be deleted and recreated before rendering!')
+                  default=None,
+                  help='Do not output anything, render source to '
+                       'specified directory for reference. CAREFUL: this directory '
+                       'will be deleted and recreated before rendering!')
 parser.add_option('--debug', dest='debug', action='store_true',
                   default=False, help='More output for debugging')
 parser.add_option('--convert-cmd', dest='convert_cmd', default='/usr/bin/convert',
