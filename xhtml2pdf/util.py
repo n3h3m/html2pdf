@@ -18,15 +18,18 @@ import sys
 import tempfile
 from six import binary_type, BytesIO
 
-import urllib
 try:
-    import urllib2
+    from urllib2 import urlopen, HTTPError
 except ImportError:
-    import urllib.request as urllib2
+    from urllib.request import urlopen, HTTPError
 try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
+try:
+    from urllib import splithost
+except ImportError:
+    from urllib.parse import splithost
 
 # Copyright 2010 Dirk Holtwick, holtwick.it
 #
@@ -564,7 +567,7 @@ class pisaFileObject:
             if urlParts.scheme == 'file':
                 if basepath and uri.startswith('/'):
                     uri = urlparse.urljoin(basepath, uri[1:])
-                urlResponse = urllib2.urlopen(uri)
+                urlResponse = urlopen(uri)
                 self.mimetype = urlResponse.info().get(
                     "Content-Type", '').split(";")[0]
                 self.uri = urlResponse.geturl()
@@ -582,7 +585,7 @@ class pisaFileObject:
                 #mimetype = getMimeType(path)
 
                 # Using HTTPLIB
-                server, path = urllib.splithost(uri[uri.find("//"):])
+                server, path = splithost(uri[uri.find("//"):])
                 if uri.startswith("https://"):
                     conn = httplib.HTTPSConnection(server)
                 else:
@@ -610,8 +613,8 @@ class pisaFileObject:
                         self.file = r1
                 else:
                     try:
-                        urlResponse = urllib2.urlopen(uri)
-                    except urllib2.HTTPError:
+                        urlResponse = urlopen(uri)
+                    except HTTPError:
                         return
                     self.mimetype = urlResponse.info().get(
                         "Content-Type", '').split(";")[0]
