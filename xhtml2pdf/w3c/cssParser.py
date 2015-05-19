@@ -515,7 +515,7 @@ class CSSParser(object):
         ;
         """
         # Get rid of the comments
-        src = self.re_comment.sub(u'', src.decode())
+        src = self.re_comment.sub(u'', src.encode())
 
         # [ CHARSET_SYM S* STRING S* ';' ]?
         src = self._parseAtCharset(src)
