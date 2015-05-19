@@ -14,8 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+
 import xhtml2pdf.pisa as pisa
-import StringIO
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import logging
 
@@ -31,7 +37,7 @@ class Filter(object):
         script_name = environ.get('SCRIPT_NAME', '')
         path_info = environ.get('PATH_INFO', '')
         sent = []
-        written_response = StringIO.StringIO()
+        written_response = StringIO()
 
         def replacement_start_response(status, headers, exc_info=None):
             if not self.should_filter(status, headers):
@@ -51,15 +57,14 @@ class Filter(object):
             if hasattr(app_iter, 'close'):
                 app_iter.close()
         body = written_response.getvalue()
-        status, headers, body = self.filter(
-            script_name, path_info, environ, status, headers, body)
+        status, headers, body = self.filter(script_name, path_info, environ, status, headers, body)
         start_response(status, headers, exc_info)
         return [body]
 
     def should_filter(self, status, headers):
-        print (headers)
+        print(headers)
 
-    def filter(self, status, headers, body):
+    def filter(self, *args):
         raise NotImplementedError
 
 
@@ -77,7 +82,7 @@ class PisaMiddleware(HTMLFilter):
     def filter(self, script_name, path_info, environ, status, headers, body):
         topdf = environ.get("pisa.topdf", "")
         if topdf:
-            dst = StringIO.StringIO()
+            dst = StringIO()
             pisa.CreatePDF(body, dst, show_error_as_pdf=True)
             headers = [
                 ("content-type", "application/pdf"),

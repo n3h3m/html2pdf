@@ -264,7 +264,8 @@ class CSSParseError(Exception):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class CSSParser(object):
-    """CSS-2.1 parser dependent only upon the re module.
+    """
+    CSS-2.1 parser dependent only upon the re module.
 
     Implemented directly from http://www.w3.org/TR/CSS21/grammar.html
     Tested with some existing CSS stylesheets for portability.
@@ -274,42 +275,42 @@ class CSSParser(object):
             To set your concrete implementation of CSSBuilderAbstract
 
         * parseFile()
-            Use to parse external stylesheets using a file-like object
+            Use to parse external stylesheets using a file-like object::
 
-            >>> cssFile = open('test.css', 'r')
-            >>> stylesheets = myCSSParser.parseFile(cssFile)
+                >>> cssFile = open('test.css', 'r')
+                >>> stylesheets = myCSSParser.parseFile(cssFile)
 
         * parse()
-            Use to parse embedded stylesheets using source string
+            Use to parse embedded stylesheets using source string::
 
-            >>> cssSrc = '''
-                body,body.body {
-                    font: 110%, "Times New Roman", Arial, Verdana, Helvetica, serif;
-                    background: White;
-                    color: Black;
-                }
-                a {text-decoration: underline;}
-            '''
-            >>> stylesheets = myCSSParser.parse(cssSrc)
+                >>> cssSrc = '''
+                    body,body.body {
+                        font: 110%, "Times New Roman", Arial, Verdana, Helvetica, serif;
+                        background: White;
+                        color: Black;
+                    }
+                    a {text-decoration: underline;}
+                '''
+                >>> stylesheets = myCSSParser.parse(cssSrc)
 
         * parseInline()
-            Use to parse inline stylesheets using attribute source string
+            Use to parse inline stylesheets using attribute source string::
 
-            >>> style = 'font: 110%, "Times New Roman", Arial, Verdana, Helvetica, serif; background: White; color: Black'
-            >>> stylesheets = myCSSParser.parseInline(style)
+                >>> style = 'font: 110%, "Times New Roman", Arial, Verdana, Helvetica, serif; background: White; color: Black'
+                >>> stylesheets = myCSSParser.parseInline(style)
 
         * parseAttributes()
-            Use to parse attribute string values into inline stylesheets
+            Use to parse attribute string values into inline stylesheets::
 
-            >>> stylesheets = myCSSParser.parseAttributes(
-                    font='110%, "Times New Roman", Arial, Verdana, Helvetica, serif',
-                    background='White',
-                    color='Black')
+                >>> stylesheets = myCSSParser.parseAttributes(
+                        font='110%, "Times New Roman", Arial, Verdana, Helvetica, serif',
+                        background='White',
+                        color='Black')
 
         * parseSingleAttr()
-            Use to parse a single string value into a CSS expression
+            Use to parse a single string value into a CSS expression::
 
-            >>> fontValue = myCSSParser.parseSingleAttr('110%, "Times New Roman", Arial, Verdana, Helvetica, serif')
+                >>> fontValue = myCSSParser.parseSingleAttr('110%, "Times New Roman", Arial, Verdana, Helvetica, serif')
     """
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -426,6 +427,7 @@ class CSSParser(object):
 
     def parse(self, src):
         """Parses CSS string source using the current cssBuilder.
+        :type src: str
         Use for embedded stylesheets."""
 
         self.cssBuilder.beginStylesheet()
@@ -461,33 +463,31 @@ class CSSParser(object):
             self.cssBuilder.endInline()
         return result
 
-
-    def parseAttributes(self, attributes={}, **kwAttributes):
+    def parseAttributes(self, attributes=None, **kwAttributes):
         """Parses CSS attribute source strings, and return as an inline stylesheet.
         Use to parse a tag's highly CSS-based attributes like 'font'.
 
         See also: parseSingleAttr
         """
+        if attributes is None:
+            attributes = {}
         if attributes:
             kwAttributes.update(attributes)
 
         self.cssBuilder.beginInline()
         try:
             properties = []
-            try:
-                for propertyName, src in kwAttributes.iteritems():
+            for propertyName, src in kwAttributes.items():
+                try:
                     src, property = self._parseDeclarationProperty(src.strip(), propertyName)
                     properties.append(property)
-
-            except self.ParseError as err:
-                err.setFullCSSSource(src, inline=True)
-                raise
-
+                except self.ParseError as err:
+                    err.setFullCSSSource(src, inline=True)
+                    raise
             result = self.cssBuilder.inline(properties)
         finally:
             self.cssBuilder.endInline()
         return result
-
 
     def parseSingleAttr(self, attrValue):
         """Parse a single CSS attribute source string, and returns the built CSS expression.
@@ -515,7 +515,7 @@ class CSSParser(object):
         ;
         """
         # Get rid of the comments
-        src = self.re_comment.sub(u'', src)
+        src = self.re_comment.sub(u'', src.decode())
 
         # [ CHARSET_SYM S* STRING S* ';' ]?
         src = self._parseAtCharset(src)
@@ -567,6 +567,7 @@ class CSSParser(object):
     def _parseAtCharset(self, src):
         """[ CHARSET_SYM S* STRING S* ';' ]?"""
         if isAtRuleIdent(src, 'charset'):
+            ctxsrc = src
             src = stripAtRuleIdent(src)
             charset, src = self._getString(src)
             src = src.lstrip()
