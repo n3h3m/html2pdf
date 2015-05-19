@@ -516,8 +516,10 @@ class CSSParser(object):
         ;
         """
         # Get rid of the comments
+        if not isinstance(src, six.text_type):
+            src = src.decode()
         assert isinstance(src, six.text_type), "'src' must be text!"
-        src = self.re_comment.sub(u'', src)
+        src = self.re_comment.sub(six.u(''), src)
 
         # [ CHARSET_SYM S* STRING S* ';' ]?
         src = self._parseAtCharset(src)
