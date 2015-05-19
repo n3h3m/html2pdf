@@ -132,7 +132,7 @@ class CSSBuilderAbstract(object):
     # ~ css @ directives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def atCharset(self, charset):
-
+        raise NotImplementedError('Subclass responsibility')
 
     def atImport(self, import_, mediums, cssParser):
         raise NotImplementedError('Subclass responsibility')
@@ -194,9 +194,9 @@ class CSSBuilderAbstract(object):
     def termUnknown(self, src):
         raise NotImplementedError('Subclass responsibility')
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ CSS Parser
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~ CSS Parser
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class CSSParseError(Exception):
     src = None
@@ -207,7 +207,6 @@ class CSSParseError(Exception):
     srcFullIdx = None
     ctxsrcFullIdx = None
 
-
     def __init__(self, msg, src, ctxsrc=None):
         super(Exception, self).__init__(msg)
         self.src = src
@@ -217,14 +216,12 @@ class CSSParseError(Exception):
             if self.srcCtxIdx < 0:
                 del self.srcCtxIdx
 
-
     def __str__(self):
         if self.ctxsrc:
             return super(Exception, self).__str__(self) + ':: (' + repr(self.ctxsrc[:self.srcCtxIdx]) + ', ' + repr(
                 self.ctxsrc[self.srcCtxIdx:self.srcCtxIdx + 20]) + ')'
         else:
             return super(Exception, self).__str__(self) + ':: ' + repr(self.src[:40])
-
 
     def setFullCSSSource(self, fullsrc, inline=False):
         self.fullsrc = fullsrc
@@ -238,7 +235,7 @@ class CSSParseError(Exception):
             if self.ctxsrcFullIdx < 0:
                 del self.ctxsrcFullIdx
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class CSSParser(object):
     """
@@ -290,9 +287,9 @@ class CSSParser(object):
                 >>> fontValue = myCSSParser.parseSingleAttr('110%, "Times New Roman", Arial, Verdana, Helvetica, serif')
     """
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~ Constants / Variables / Etc.
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~ Constants / Variables / Etc.
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ParseError = CSSParseError
 
@@ -301,9 +298,9 @@ class CSSParser(object):
     SelectorCombiners = ['+', '>']
     ExpressionOperators = ('/', '+', ',')
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~ Regular expressions
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~ Regular expressions
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     _orRule = lambda *args: '|'.join(args)
     _reflags = re.I | re.M | re.U
@@ -363,14 +360,14 @@ class CSSParser(object):
     re_important = re.compile(i_important, _reflags)
     del _orRule
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~ Public
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~ Public
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def __init__(self, cssBuilder=None):
         self.setCSSBuilder(cssBuilder)
 
-    #~ CSS Builder to delegate to ~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~ CSS Builder to delegate to ~~~~~~~~~~~~~~~~~~~~~~~~
 
     def getCSSBuilder(self):
         """A concrete instance implementing CSSBuilderAbstract"""
@@ -382,9 +379,9 @@ class CSSParser(object):
 
     cssBuilder = property(getCSSBuilder, setCSSBuilder)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~ Public CSS Parsing API
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~ Public CSS Parsing API
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def parseFile(self, srcFile, closeFile=False):
         """Parses CSS file-like objects using the current cssBuilder.
@@ -396,7 +393,6 @@ class CSSParser(object):
             if closeFile:
                 srcFile.close()
         return result
-
 
     def parse(self, src):
         """Parses CSS string source using the current cssBuilder.
@@ -418,7 +414,6 @@ class CSSParser(object):
         finally:
             self.cssBuilder.endStylesheet()
         return stylesheet
-
 
     def parseInline(self, src):
         """Parses CSS inline source string using the current cssBuilder.
@@ -475,9 +470,9 @@ class CSSParser(object):
         else:
             return results[0]['temp']
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~ Internal _parse methods
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~ Internal _parse methods
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def _parseStylesheet(self, src):
         """stylesheet
@@ -520,7 +515,6 @@ class CSSParser(object):
         stylesheet = self.cssBuilder.stylesheet(stylesheetElements, stylesheetImports)
         return src, stylesheet
 
-
     def _parseSCDOCDC(self, src):
         """[S|CDO|CDC]*"""
         while 1:
@@ -534,7 +528,7 @@ class CSSParser(object):
         return src
 
 
-    #~ CSS @ directives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~ CSS @ directives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def _parseAtCharset(self, src):
         """[ CHARSET_SYM S* STRING S* ';' ]?"""
@@ -549,7 +543,6 @@ class CSSParser(object):
 
             self.cssBuilder.atCharset(charset)
         return src
-
 
     def _parseAtImports(self, src):
         """[ import [S|CDO|CDC]* ]*"""
@@ -587,7 +580,6 @@ class CSSParser(object):
             src = self._parseSCDOCDC(src)
         return src, result
 
-
     def _parseAtNamespace(self, src):
         """namespace :
 
@@ -620,7 +612,6 @@ class CSSParser(object):
             src = self._parseSCDOCDC(src)
         return src
 
-
     def _parseAtKeyword(self, src):
         """[media | page | font_face | unknown_keyword]"""
         ctxsrc = src
@@ -640,7 +631,6 @@ class CSSParser(object):
         else:
             raise self.ParseError('Unknown state in atKeyword', src, ctxsrc)
         return src, result
-
 
     def _parseAtMedia(self, src):
         """media
@@ -672,7 +662,7 @@ class CSSParser(object):
         src = src[1:].lstrip()
 
         stylesheetElements = []
-        #while src and not src.startswith('}'):
+        # while src and not src.startswith('}'):
         #    src, ruleset = self._parseRuleset(src)
         #    stylesheetElements.append(ruleset)
         #    src = src.lstrip()
@@ -698,7 +688,6 @@ class CSSParser(object):
         result = self.cssBuilder.atMedia(mediums, stylesheetElements)
         return src, result
 
-
     def _parseAtPage(self, src):
         """page
         : PAGE_SYM S* IDENT? pseudo_page? S*
@@ -714,7 +703,7 @@ class CSSParser(object):
         else:
             pseudopage = None
 
-        #src, properties = self._parseDeclarationGroup(src.lstrip())
+        # src, properties = self._parseDeclarationGroup(src.lstrip())
 
         # Containing @ where not found and parsed
         stylesheetElements = []
@@ -742,7 +731,6 @@ class CSSParser(object):
 
         return src[1:].lstrip(), result
 
-
     def _parseAtFrame(self, src):
         """
         XXX Proprietary for PDF
@@ -754,14 +742,12 @@ class CSSParser(object):
         result = [self.cssBuilder.atFrame(box, properties)]
         return src.lstrip(), result
 
-
     def _parseAtFontFace(self, src):
         ctxsrc = src
         src = src[len('@font-face '):].lstrip()
         src, properties = self._parseDeclarationGroup(src)
         result = [self.cssBuilder.atFontFace(properties)]
         return src, result
-
 
     def _parseAtIdent(self, src):
         ctxsrc = src
@@ -772,7 +758,8 @@ class CSSParser(object):
         src, result = self.cssBuilder.atIdent(atIdent, self, src)
 
         if result is NotImplemented:
-            # An at-rule consists of everything up to and including the next semicolon (;) or the next block, whichever comes first
+            # An at-rule consists of everything up to and including the next semicolon (;) or the next block,
+            # whichever comes first
 
             semiIdx = src.find(';')
             if semiIdx < 0:
@@ -801,7 +788,7 @@ class CSSParser(object):
         return src.lstrip(), result
 
 
-    #~ ruleset - see selector and declaration groups ~~~~
+    # ~ ruleset - see selector and declaration groups ~~~~
 
     def _parseRuleset(self, src):
         """ruleset
@@ -814,8 +801,7 @@ class CSSParser(object):
         result = self.cssBuilder.ruleset(selectors, properties)
         return src, result
 
-
-    #~ selector parsing ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~ selector parsing ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def _parseSelectorGroup(self, src):
         selectors = []
@@ -827,7 +813,6 @@ class CSSParser(object):
             if src.startswith(','):
                 src = src[1:].lstrip()
         return src, selectors
-
 
     def _parseSelector(self, src):
         """selector
@@ -855,7 +840,6 @@ class CSSParser(object):
             selector = self.cssBuilder.combineSelectors(selector, combiner, selectorB)
 
         return src.lstrip(), selector
-
 
     def _parseSimpleSelector(self, src):
         """simple_selector
@@ -893,7 +877,6 @@ class CSSParser(object):
                 break
 
         return src.lstrip(), selector
-
 
     def _parseSelectorAttribute(self, src, selector):
         """attrib
@@ -943,7 +926,6 @@ class CSSParser(object):
             selector.addAttribute(attrName)
         return src, selector
 
-
     def _parseSelectorPseudo(self, src, selector):
         """pseudo
         : ':' [ IDENT | function ]
@@ -971,8 +953,7 @@ class CSSParser(object):
 
         return src, selector
 
-
-    #~ declaration and expression parsing ~~~~~~~~~~~~~~~
+    # ~ declaration and expression parsing ~~~~~~~~~~~~~~~
 
     def _parseDeclarationGroup(self, src, braces=True):
         ctxsrc = src
@@ -1006,7 +987,6 @@ class CSSParser(object):
 
         return src.lstrip(), properties
 
-
     def _parseDeclaration(self, src):
         """declaration
         : ident S* ':' S* expr prio?
@@ -1031,7 +1011,6 @@ class CSSParser(object):
 
         return src, property
 
-
     def _parseDeclarationProperty(self, src, propertyName):
         # expr
         src, expr = self._parseExpression(src)
@@ -1042,7 +1021,6 @@ class CSSParser(object):
 
         property = self.cssBuilder.property(propertyName, expr, important)
         return src, property
-
 
     def _parseExpression(self, src, returnList=False):
         """
@@ -1070,7 +1048,6 @@ class CSSParser(object):
             return src, term
         else:
             return src, term
-
 
     def _parseExpressionTerm(self, src):
         """term
@@ -1133,12 +1110,10 @@ class CSSParser(object):
 
         return self.cssBuilder.termUnknown(src)
 
-
-    #~ utility methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~ utility methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def _getIdent(self, src, default=None):
         return self._getMatchResult(self.re_ident, src, default)
-
 
     def _getString(self, src, rexpression=None, default=None):
         if rexpression is None:
@@ -1157,13 +1132,11 @@ class CSSParser(object):
         else:
             return default, src
 
-
     def _getStringOrURI(self, src):
         result, src = self._getString(src, self.re_uri)
         if result is None:
             result, src = self._getString(src)
         return result, src
-
 
     def _getMatchResult(self, rexpression, src, default=None, group=1):
         result = rexpression.match(src)
