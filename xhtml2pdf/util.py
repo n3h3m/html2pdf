@@ -13,7 +13,6 @@ import os.path
 import re
 import reportlab
 import shutil
-import string
 import sys
 import tempfile
 from six import binary_type, BytesIO
@@ -106,7 +105,7 @@ class memoized(object):
         # Make sure the following line is not actually slower than what you're
         # trying to memoize
         if sys.version[0] == '2':
-            args_plus = tuple(kwargs.iteritems())
+            args_plus = tuple(kwargs.items())
         else:
             args_plus = tuple(iter(kwargs.items()))
         key = (args, args_plus)
@@ -126,13 +125,11 @@ def ErrorMsg():
     """
     import traceback
 
-    type = value = tb = limit = None
-    type, value, tb = sys.exc_info()
-    list = traceback.format_tb(tb, limit) + \
-        traceback.format_exception_only(type, value)
-    return "Traceback (innermost last):\n" + "%-20s %s" % (
-        string.join(list[: - 1], ""),
-        list[- 1])
+    limit = None
+    tb_type, tb_value, tb = sys.exc_info()
+    tb_list = traceback.format_tb(tb, limit) + \
+        traceback.format_exception_only(tb_type, tb_value)
+    return "Traceback (innermost last):\n" + "%-20s %s" % ("".join(tb_list[: - 1]), tb_list[- 1])
 
 
 def toList(value):
