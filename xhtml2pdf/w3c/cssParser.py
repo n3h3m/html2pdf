@@ -218,10 +218,11 @@ class CSSParseError(Exception):
 
     def __str__(self):
         if self.ctxsrc:
-            return super(Exception, self).__str__(self) + ':: (' + repr(self.ctxsrc[:self.srcCtxIdx]) + ', ' + repr(
-                self.ctxsrc[self.srcCtxIdx:self.srcCtxIdx + 20]) + ')'
+            return "{0}:: ({1}, {2})".format(super(Exception, self).__str__(),
+                                             repr(self.ctxsrc[:self.srcCtxIdx]),
+                                             repr(self.ctxsrc[self.srcCtxIdx:self.srcCtxIdx + 20]))
         else:
-            return super(Exception, self).__str__(self) + ':: ' + repr(self.src[:40])
+            return "{0}:: {1}".format(super(Exception, self).__str__(), repr(self.src[:40]))
 
     def setFullCSSSource(self, fullsrc, inline=False):
         self.fullsrc = fullsrc
@@ -395,13 +396,19 @@ class CSSParser(object):
         return result
 
     def parse(self, src):
-        """Parses CSS string source using the current cssBuilder.
+        """
+
+        Parses CSS string source using the current cssBuilder.
+
+        Use for embedded stylesheets.
+
+        :param src:
         :type src: str
-        Use for embedded stylesheets."""
+        """
 
         self.cssBuilder.beginStylesheet()
         if not isinstance(src, six.text_type):
-            src = src.decode()
+            src = src.decode()  # FIXME use text from the get go
         assert isinstance(src, six.text_type), "'src' must be text!"
         try:
             # XXX Some simple preprocessing
