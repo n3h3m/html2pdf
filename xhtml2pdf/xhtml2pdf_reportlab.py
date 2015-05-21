@@ -14,33 +14,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hashlib import md5
-from reportlab.lib.enums import TA_RIGHT
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.utils import flatten, open_for_read, getStringIO, \
-    LazyImageReader, haveImages
-from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate, IndexingFlowable
-from reportlab.platypus.flowables import Flowable, CondPageBreak, \
-    KeepInFrame, ParagraphAndImage
-from reportlab.platypus.tableofcontents import TableOfContents
-from reportlab.platypus.tables import Table, TableStyle
-from xhtml2pdf.reportlab_paragraph import Paragraph
-from xhtml2pdf.util import get_uid, get_border_style
-
 import sys
-
-try:
-    import StringIO
-except Exception:
-    from io import StringIO
-    StringIO_old = StringIO
-    class StringIO(object):
-        StringIO = StringIO_old
-
 import cgi
 import copy
 import logging
+
+from hashlib import md5
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 import reportlab.pdfbase.pdfform as pdfform
+
+from reportlab.lib.enums import TA_RIGHT
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.utils import flatten, open_for_read, getStringIO, LazyImageReader, haveImages
+from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate, IndexingFlowable
+from reportlab.platypus.flowables import Flowable, CondPageBreak, KeepInFrame, ParagraphAndImage
+from reportlab.platypus.tableofcontents import TableOfContents
+from reportlab.platypus.tables import Table, TableStyle
+
+from six import text_type, BytesIO
 
 try:
     import PIL.Image as PILImage
@@ -49,6 +45,9 @@ except:
         import Image as PILImage
     except:
         PILImage = None
+
+from xhtml2pdf.reportlab_paragraph import Paragraph
+from xhtml2pdf.util import get_uid, get_border_style
 
 log = logging.getLogger("xhtml2pdf")
 
@@ -323,7 +322,7 @@ class PmlImageReader(object):  # TODO We need a factory here, returning either a
         else:
             try:
                 self.fp = open_for_read(fileName, 'b')
-                if isinstance(self.fp, StringIO.StringIO().__class__):
+                if isinstance(self.fp, StringIO):
                     imageReaderFlags = 0  # avoid messing with already internal files
                 if imageReaderFlags > 0:  # interning
                     data = self.fp.read()
@@ -339,7 +338,7 @@ class PmlImageReader(object):  # TODO We need a factory here, returning either a
 
                         data = self._cache.setdefault(md5(data).digest(), data)
                     self.fp = getStringIO(data)
-                elif imageReaderFlags == - 1 and isinstance(fileName, (str, unicode)):
+                elif imageReaderFlags == - 1 and isinstance(fileName, text_type):
                     #try Ralf Schmitt's re-opening technique of avoiding too many open files
                     self.fp.close()
                     del self.fp  # will become a property in the next statement
@@ -505,7 +504,7 @@ class PmlImage(Flowable, PmlMaxHeightMixIn):
         return self.dWidth, self.dHeight
 
     def getImage(self):
-        img = PmlImageReader(StringIO.StringIO(self._imgdata))
+        img = PmlImageReader(BytesIO(self._imgdata))
         return img
 
     def draw(self):

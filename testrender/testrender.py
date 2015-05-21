@@ -27,7 +27,7 @@ def render_pdf(filename, output_dir, options):
     input = open(filename, 'rb')
     output = open(outfile, 'wb')
 
-    result = pisa.pisaDocument(input, output, path=filename)
+    result = pisa.pisa_document(input, output, path=filename)
 
     input.close()
     output.close()

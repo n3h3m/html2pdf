@@ -1,13 +1,4 @@
 # -*- coding: utf-8 -*-
-from xhtml2pdf.context import PisaContext
-from xhtml2pdf.default import DEFAULT_CSS
-from xhtml2pdf.parser import pisaParser
-from reportlab.platypus.flowables import Spacer
-from reportlab.platypus.frames import Frame
-from xhtml2pdf.xhtml2pdf_reportlab import PmlBaseDoc, PmlPageTemplate
-from xhtml2pdf.util import PisaTempFile, get_box, PyPDF2
-import cgi
-import logging
 
 # Copyright 2010 Dirk Holtwick, holtwick.it
 #
@@ -23,10 +14,22 @@ import logging
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cgi
+import logging
+
+from xhtml2pdf.context import PisaContext
+from xhtml2pdf.default import DEFAULT_CSS
+from xhtml2pdf.parser import pisaParser
+from xhtml2pdf.xhtml2pdf_reportlab import PmlBaseDoc, PmlPageTemplate
+from xhtml2pdf.util import PisaTempFile, get_box, PyPDF2
+
+from reportlab.platypus.flowables import Spacer
+from reportlab.platypus.frames import Frame
+
 log = logging.getLogger("xhtml2pdf")
 
 
-def pisaErrorDocument(dest, c):
+def pisa_error_document(dest, c):
     out = PisaTempFile(capacity=c.capacity)
     out.write("<p style='background-color:red;'><strong>%d error(s) occured:</strong><p>" % c.err)
     for mode, line, msg, _ in c.log:
@@ -38,16 +41,15 @@ def pisaErrorDocument(dest, c):
         if mode == "warning":
             out.write("<p>%s in line %d: %s</p>" % (mode, line, cgi.escape(msg)))
 
-    return pisaDocument(out.getvalue(), dest, raise_exception=False)
+    return pisa_document(out.getvalue(), dest, raise_exception=False)
 
 
-def pisaStory(src, path=None, link_callback=None, debug=0, default_css=None,
-              xhtml=False, encoding=None, context=None, xml_output=None,
-              **kw):
+def pisa_story(src, path=None, link_callback=None, debug=0, default_css=None, xhtml=False, encoding=None, context=None,
+               xml_output=None, **kwargs):
     # Prepare Context
     if not context:
         context = PisaContext(path, debug=debug)
-        context.pathCallback = link_callback
+        context.path_callback = link_callback
 
     # Use a default set of CSS definitions to get an expected output
     if default_css is None:
@@ -70,63 +72,45 @@ def pisaStory(src, path=None, link_callback=None, debug=0, default_css=None,
     return context
 
 
-def pisaDocument(src, dest=None, path=None, link_callback=None, debug=0,
-                 default_css=None, xhtml=False, encoding=None, xml_output=None,
-                 raise_exception=True, capacity=100 * 1024, **kw):
+def pisa_document(src, dest=None, path=None, link_callback=None, debug=0, default_css=None, xhtml=False, encoding=None,
+                  xml_output=None, raise_exception=True, capacity=100 * 1024, **kwargs):
     log.debug("pisaDocument options:\n  src = %r\n  dest = %r\n  path = %r\n  link_callback = %r\n  xhtml = %r",
-              src,
-              dest,
-              path,
-              link_callback,
-              xhtml)
-
-    # Prepare simple context
-    context = PisaContext(path, debug=debug, capacity=capacity)
-    context.pathCallback = link_callback
-
+              src, dest, path, link_callback, xhtml)
     # Build story
-    context = pisaStory(src, path, link_callback, debug, default_css, xhtml,
-                        encoding, context=context, xml_output=xml_output)
+    context = pisa_story(src, path, link_callback, debug, default_css, xhtml, encoding,
+                         context=PisaContext(path, debug=debug, capacity=capacity), xml_output=xml_output)
 
     # Buffer PDF into memory
     out = PisaTempFile(capacity=context.capacity)
-
-    doc = PmlBaseDoc(
-        out,
-        pagesize=context.pageSize,
-        author=context.meta["author"].strip(),
-        subject=context.meta["subject"].strip(),
-        keywords=[x.strip() for x in
-                  context.meta["keywords"].strip().split(",") if x],
-        title=context.meta["title"].strip(),
-        showBoundary=0,
-        allowSplitting=1)
-
+    doc = PmlBaseDoc(out,
+                     pagesize=context.pageSize,
+                     author=context.meta["author"].strip(),
+                     subject=context.meta["subject"].strip(),
+                     keywords=[x.strip() for x in context.meta["keywords"].strip().split(",") if x],
+                     title=context.meta["title"].strip(),
+                     showBoundary=0,
+                     allowSplitting=1)
     # Prepare templates and their frames
     if "body" in context.templateList:
         body = context.templateList["body"]
         del context.templateList["body"]
     else:
         x, y, w, h = get_box("1cm 1cm -1cm -1cm", context.pageSize)
-        body = PmlPageTemplate(
-            id="body",
-            frames=[
-                Frame(x, y, w, h,
-                      id="body",
-                      leftPadding=0,
-                      rightPadding=0,
-                      bottomPadding=0,
-                      topPadding=0)],
-            pagesize=context.pageSize)
+        body = PmlPageTemplate(id="body",
+                               frames=[Frame(x, y, w, h,
+                                             id="body",
+                                             leftPadding=0,
+                                             rightPadding=0,
+                                             bottomPadding=0,
+                                             topPadding=0)],
+                               pagesize=context.pageSize)
 
     doc.addPageTemplates([body] + list(context.templateList.values()))
-
     # Use multibuild e.g. if a TOC has to be created
     if context.multiBuild:
         doc.multiBuild(context.story)
     else:
         doc.build(context.story)
-
     # Add watermarks
     if PyPDF2:
         for bgouter in context.pisaBackgroundList:
@@ -159,10 +143,8 @@ def pisaDocument(src, dest=None, path=None, link_callback=None, debug=0,
                 break
     else:
         log.warn(context.warning("PyPDF2 not installed!"))
-
     # Get the resulting PDF and write it to the file object
     # passed from the caller
-
     if dest is None:
         # No output file was passed - Let's use a pisaTempFile
         dest = PisaTempFile(capacity=context.capacity)

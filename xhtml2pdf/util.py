@@ -408,54 +408,27 @@ def get_alignment(value, default=TA_LEFT):
 
 class PisaTempFile(object):
     """
-    A temporary file implementation that uses memory unless either capacity is breached or fileno is requested, at which
-    point a real temporary file will be created and the relevant details returned.
+    A thin wrapper around `tempfile.SpooledTemporaryFile()`.
 
-    If capacity is -1 the second strategy will never be used.
-
-    Inspired by:
-    http://code.activestate.com/recipes/496744/
+    Deprecated: Callers should use `SpooledTemporaryFile()` directly.
     """
 
-    STRATEGIES = (BytesIO, BytesIO) if "google.appengine" in sys.modules else (BytesIO, tempfile.NamedTemporaryFile)
-
-    CAPACITY = 10 * 1024
-
-    def __init__(self, buffer="", capacity=CAPACITY):
+    def __init__(self, buffer=None, **kwargs):
         """
         Creates a TempFile object containing the specified buffer. If capacity is specified, we use a real temporary
         file once the file gets larger than that size. Otherwise, the data is stored in memory.
         """
-
-        self.capacity = capacity
-        self.strategy = int(len(buffer) > self.capacity)
-        self._delegate = self.STRATEGIES[self.strategy]()
-        self.write(buffer)
-        # we must set the file's position for preparing to read
-        self.seek(0)
-
-    def make_temp_file(self):
-        """
-        Switch to next startegy. If an error occured,
-        stay with the first strategy
-        """
-
-        if self.strategy == 0:
-            try:
-                new_delegate = self.STRATEGIES[1]()
-                new_delegate.write(self.getvalue())
-                self._delegate = new_delegate
-                self.strategy = 1
-                log.warn("Created temporary file %s", self.name)
-            except:
-                self.capacity = -1
+        if buffer is None:
+            self._delegate = tempfile.SpooledTemporaryFile()
+        else:
+            self._delegate = tempfile.SpooledTemporaryFile(buffer)
 
     def get_file_name(self):
         """
         Get a named temporary file
         """
 
-        self.make_temp_file()
+        self._delegate.rollover()
         return self.name
 
     def fileno(self):
@@ -463,17 +436,12 @@ class PisaTempFile(object):
         Forces this buffer to use a temporary file as the underlying.
         object and returns the fileno associated with it.
         """
-        self.make_temp_file()
         return self._delegate.fileno()
 
     def getvalue(self):
         """
-        Get value of file. Work around for second strategy.
-        Always returns bytes
+        Get value of file. Work around for second strategy. Always returns bytes
         """
-
-        if self.strategy == 0:
-            return self._delegate.getvalue()
         self._delegate.flush()
         self._delegate.seek(0)
         value = self._delegate.read()
@@ -485,19 +453,9 @@ class PisaTempFile(object):
         """
         If capacity != -1 and length of file > capacity it is time to switch
         """
-
-        if self.capacity > 0 and self.strategy == 0:
-            len_value = len(value)
-            if len_value >= self.capacity:
-                needs_new_strategy = True
-            else:
-                self.seek(0, 2)  # find end of file
-                needs_new_strategy = \
-                    (self.tell() + len_value) >= self.capacity
-            if needs_new_strategy:
-                self.make_temp_file()
         if not isinstance(value, binary_type):
             value = value.encode('utf-8')
+        print(type(value))
         self._delegate.write(value)
 
     def __getattr__(self, name):
@@ -505,13 +463,11 @@ class PisaTempFile(object):
             return getattr(self._delegate, name)
         except AttributeError:
             # hide the delegation
-            e = "object '%s' has no attribute '%s'" \
-                % (self.__class__.__name__, name)
+            e = "object '%s' has no attribute '%s'" % (self.__class__.__name__, name)
             raise AttributeError(e)
 
 
-_rx_datauri = re.compile(
-    "^data:(?P<mime>[a-z]+/[a-z]+);base64,(?P<data>.*)$", re.M | re.DOTALL)
+_rx_datauri = re.compile("^data:(?P<mime>[a-z]+/[a-z]+);base64,(?P<data>.*)$", re.M | re.DOTALL)
 
 
 class PisaFileObject:

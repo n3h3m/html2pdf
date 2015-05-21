@@ -21,7 +21,7 @@ import sys
 import tempfile
 
 from xhtml2pdf.default import DEFAULT_CSS
-from xhtml2pdf.document import pisaDocument
+from xhtml2pdf.document import pisa_document
 from xhtml2pdf.util import get_file
 from xhtml2pdf.version import VERSION, VERSION_STR
 
@@ -39,7 +39,7 @@ log = logging.getLogger("xhtml2pdf")
 __version__ = VERSION
 
 # Backward compatibility
-CreatePDF = pisaDocument
+CreatePDF = pisa_document
 
 USAGE = (VERSION_STR + """
 
@@ -356,7 +356,7 @@ def execute():
         if not quiet:
             print ("Converting %s to %s...") % (src, dest)
 
-        pdf = pisaDocument(
+        pdf = pisa_document(
             fsrc,
             fdest,
             debug=debug,

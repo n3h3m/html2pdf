@@ -247,7 +247,7 @@ class PisaCSSBuilder(css.CSSBuilder):
             size_list = []
             for value in size:
                 valueStr = str(value).lower()
-                if type(value) is TupleType:
+                if isinstance(value, tuple):
                     size_list.append(get_size(value))
                 elif valueStr == "landscape":
                     is_landscape = True
@@ -455,7 +455,7 @@ class PisaContext(object):
         self.imageData = {}
         self.force = False
 
-        self.pathCallback = None # External callback function for path calculations
+        self.path_callback = None # External callback function for path calculations
 
         # Store path to document
         self.pathDocument = path or "__dummy__"
@@ -818,8 +818,8 @@ class PisaContext(object):
             path = relative or self.pathDirectory
             if name.startswith("data:"):
                 return name
-            if self.pathCallback is not None:
-                nv = self.pathCallback(name, relative)
+            if self.path_callback is not None:
+                nv = self.path_callback(name, relative)
             else:
                 if path is None:
                     log.warn("Could not find main directory for getting filename. Use CWD")
@@ -837,7 +837,7 @@ class PisaContext(object):
         """
         Returns a file name or None
         """
-        if self.pathCallback is not None:
+        if self.path_callback is not None:
             return get_file(self._get_file_deprecated(name, relative))
         return get_file(name, relative or self.pathDirectory)
 
@@ -934,20 +934,20 @@ class PisaContext(object):
 
                     # Include font
                     face = pdfmetrics.EmbeddedType1Face(afm, pfb)
-                    fontNameOriginal = face.name
+                    font_name_original = face.name
                     pdfmetrics.registerTypeFace(face)
                     # print fontName, fontNameOriginal, fullFontName
-                    justFont = pdfmetrics.Font(full_font_name, fontNameOriginal, encoding)
-                    pdfmetrics.registerFont(justFont)
+                    just_font = pdfmetrics.Font(full_font_name, font_name_original, encoding)
+                    pdfmetrics.registerFont(just_font)
 
                     # Add or replace missing styles
                     for bold in (0, 1):
                         for italic in (0, 1):
                             if ("%s_%d%d" % (font_name, bold, italic)) not in self.fontList:
-                                addMapping(font_name, bold, italic, fontNameOriginal)
+                                addMapping(font_name, bold, italic, font_name_original)
 
                     # Register "normal" name and the place holder for style
-                    self.register_font(font_name, font_alias + [full_font_name, fontNameOriginal])
+                    self.register_font(font_name, font_alias + [full_font_name, font_name_original])
             else:
                 log.warning(self.warning("wrong attributes for <pdf:font>"))
 

@@ -51,7 +51,7 @@ def render_to_pdf(template_src, context_dict):
     context = Context(context_dict)
     html  = template.render(context)
     result = StringIO()
-    pdf = pisa.pisaDocument(StringIO( "{0}".format(html) ), result)
+    pdf = pisa.pisa_document(StringIO( "{0}".format(html) ), result)
     if not pdf.err:
         #==============README===================
         #Django < 1.7 is content_type is mimetype
