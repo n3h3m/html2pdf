@@ -143,10 +143,10 @@ class CSSBuilderAbstract(object):
     def atMedia(self, mediums, ruleset):
         raise NotImplementedError('Subclass responsibility')
 
-    def atPage(self, page, pseudopage, declarations):
+    def at_page(self, page, pseudopage, declarations):
         raise NotImplementedError('Subclass responsibility')
 
-    def atFontFace(self, declarations):
+    def at_font_face(self, declarations):
         raise NotImplementedError('Subclass responsibility')
 
     def atIdent(self, atIdent, cssParser, src):
@@ -734,7 +734,7 @@ class CSSParser(object):
                 properties += nproperties
             src = src.lstrip()
 
-        result = [self.cssBuilder.atPage(page, pseudopage, properties)]
+        result = [self.cssBuilder.at_page(page, pseudopage, properties)]
 
         return src[1:].lstrip(), result
 
@@ -746,14 +746,14 @@ class CSSParser(object):
         src = src[len('@frame '):].lstrip()
         box, src = self._getIdent(src)
         src, properties = self._parseDeclarationGroup(src.lstrip())
-        result = [self.cssBuilder.atFrame(box, properties)]
+        result = [self.cssBuilder.at_frame(box, properties)]
         return src.lstrip(), result
 
     def _parseAtFontFace(self, src):
         ctxsrc = src
         src = src[len('@font-face '):].lstrip()
         src, properties = self._parseDeclarationGroup(src)
-        result = [self.cssBuilder.atFontFace(properties)]
+        result = [self.cssBuilder.at_font_face(properties)]
         return src, result
 
     def _parseAtIdent(self, src):

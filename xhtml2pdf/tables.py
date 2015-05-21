@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from reportlab.platypus.tables import TableStyle
-from xhtml2pdf.util import getSize, getBorderStyle, getAlign
+from xhtml2pdf.util import get_size, get_border_style, get_alignment
 from xhtml2pdf.tags import pisaTag
 from xhtml2pdf.xhtml2pdf_reportlab import PmlTable, PmlKeepInFrame
 import copy
@@ -29,7 +29,7 @@ def _width(value=None):
     value = str(value)
     if value.endswith("%"):
         return value
-    return getSize(value)
+    return get_size(value)
 
 
 def _height(value=None):
@@ -38,7 +38,7 @@ def _height(value=None):
     value = str(value)
     if value.endswith("%"):
         return value
-    return getSize(value)
+    return get_size(value)
 
 
 class TableData:
@@ -94,22 +94,22 @@ class TableData:
                 c.frag.borderRightStyle,
                 c.frag.borderRightColor,
             ))
-        if getBorderStyle(c.frag.borderTopStyle) and c.frag.borderTopWidth and c.frag.borderTopColor is not None:
+        if get_border_style(c.frag.borderTopStyle) and c.frag.borderTopWidth and c.frag.borderTopColor is not None:
             self.add_style(('LINEABOVE', begin, (end[0], begin[1]),
                             c.frag.borderTopWidth,
                             c.frag.borderTopColor,
                             "squared"))
-        if getBorderStyle(c.frag.borderLeftStyle) and c.frag.borderLeftWidth and c.frag.borderLeftColor is not None:
+        if get_border_style(c.frag.borderLeftStyle) and c.frag.borderLeftWidth and c.frag.borderLeftColor is not None:
             self.add_style(('LINEBEFORE', begin, (begin[0], end[1]),
                             c.frag.borderLeftWidth,
                             c.frag.borderLeftColor,
                             "squared"))
-        if getBorderStyle(c.frag.borderRightStyle) and c.frag.borderRightWidth and c.frag.borderRightColor is not None:
+        if get_border_style(c.frag.borderRightStyle) and c.frag.borderRightWidth and c.frag.borderRightColor is not None:
             self.add_style(('LINEAFTER', (end[0], begin[1]), end,
                             c.frag.borderRightWidth,
                             c.frag.borderRightColor,
                             "squared"))
-        if getBorderStyle(
+        if get_border_style(
                 c.frag.borderBottomStyle) and c.frag.borderBottomWidth and c.frag.borderBottomColor is not None:
             self.add_style(('LINEBELOW', (begin[0], end[1]), end,
                             c.frag.borderBottomWidth,
@@ -123,7 +123,7 @@ class TableData:
 
 class pisaTagTABLE(pisaTag):
     def start(self, c):
-        c.addPara()
+        c.add_paragraph()
 
         attrs = self.attr
 
@@ -205,14 +205,14 @@ class pisaTagTABLE(pisaTag):
                 # XXX Maybe we need to copy some more properties?
                 t.keepWithNext = c.frag.keepWithNext
                 # t.hAlign = tdata.align
-                c.addStory(t)
+                c.add_story(t)
             else:
                 log.warn(c.warning("<table> is empty"))
         except:
             log.warn(c.warning("<table>"), exc_info=1)
 
         # Cleanup and re-swap table data
-        c.clearFrag()
+        c.clear_fragment()
         c.tableData, self.tableData = self.tableData, None
 
 
@@ -237,10 +237,10 @@ class pisaTagTD(pisaTag):
     def start(self, c):
 
         if self.attr.align is not None:
-            c.frag.alignment = getAlign(self.attr.align)
+            c.frag.alignment = get_alignment(self.attr.align)
 
-        c.clearFrag()
-        self.story = c.swapStory()
+        c.clear_fragment()
+        self.story = c.swap_story()
 
         attrs = self.attr
 
@@ -319,7 +319,7 @@ class pisaTagTD(pisaTag):
     def end(self, c):
         tdata = c.tableData
 
-        c.addPara()
+        c.add_paragraph()
         cell = c.story
 
         # Keep in frame if needed since Reportlab does no split inside of cells
@@ -332,7 +332,7 @@ class pisaTagTD(pisaTag):
                 mode=mode,
                 content=cell)
 
-        c.swapStory(self.story)
+        c.swap_story(self.story)
 
         tdata.add_cell(cell)
 

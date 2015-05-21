@@ -8,7 +8,7 @@ from reportlab.platypus.flowables import Spacer, HRFlowable, PageBreak, Flowable
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.paraparser import tt2ps, ABag
 from xhtml2pdf import xhtml2pdf_reportlab
-from xhtml2pdf.util import getColor, getSize, getAlign, dpi96
+from xhtml2pdf.util import get_color, get_size, get_alignment, dpi96
 from xhtml2pdf.xhtml2pdf_reportlab import PmlImage, PmlPageTemplate
 import copy
 import logging
@@ -71,16 +71,16 @@ class pisaTagBODY(pisaTag):
 class pisaTagTITLE(pisaTag):
     def end(self, c):
         c.meta["title"] = c.text
-        c.clearFrag()
+        c.clear_fragment()
 
 
 class pisaTagSTYLE(pisaTag):
     def start(self, c):
-        c.addPara()
+        c.add_paragraph()
 
 
     def end(self, c):
-        c.clearFrag()
+        c.clear_fragment()
 
 
 class pisaTagMETA(pisaTag):
@@ -133,11 +133,11 @@ class pisaTagFONT(pisaTag):
 
     def start(self, c):
         if self.attr["color"] is not None:
-            c.frag.textColor = getColor(self.attr["color"])
+            c.frag.textColor = get_color(self.attr["color"])
         if self.attr["face"] is not None:
-            c.frag.fontName = c.getFontName(self.attr["face"])
+            c.frag.fontName = c.get_font_name(self.attr["face"])
         if self.attr["size"] is not None:
-            size = getSize(self.attr["size"], c.frag.fontSize, c.baseFontSize)
+            size = get_size(self.attr["size"], c.frag.fontSize, c.baseFontSize)
             c.frag.fontSize = max(size, 1.0)
 
     def end(self, c):
@@ -150,7 +150,7 @@ class pisaTagP(pisaTag):
         # to check if we need to add an outline-entry
         # c.frag.tag = self.tag
         if self.attr.align is not None:
-            c.frag.alignment = getAlign(self.attr.align)
+            c.frag.alignment = get_alignment(self.attr.align)
 
 
 class pisaTagDIV(pisaTagP):
@@ -270,9 +270,9 @@ class pisaTagUL(pisaTagP):
         self.counter, c.listCounter = c.listCounter, 0
 
     def end(self, c):
-        c.addPara()
+        c.add_paragraph()
         # XXX Simulate margin for the moment
-        c.addStory(Spacer(width=1, height=c.fragBlock.spaceAfter))
+        c.add_story(Spacer(width=1, height=c.fragBlock.spaceAfter))
         c.listCounter = self.counter
 
 
@@ -289,9 +289,9 @@ class pisaTagLI(pisaTag):
         if frag.listStyleImage is not None:
             frag.text = u""
             f = frag.listStyleImage
-            if f and (not f.notFound()):
+            if f and (not f.not_found()):
                 img = PmlImage(
-                    f.getData(),
+                    f.get_data(),
                     width=None,
                     height=None)
                 img.drawHeight *= dpi96
@@ -319,7 +319,7 @@ class pisaTagLI(pisaTag):
 class pisaTagBR(pisaTag):
     def start(self, c):
         c.frag.lineBreak = 1
-        c.addFrag()
+        c.add_fragment()
         c.fragStrip = True
         del c.frag.lineBreak
         c.force = True
@@ -328,7 +328,7 @@ class pisaTagBR(pisaTag):
 class pisaTagIMG(pisaTag):
     def start(self, c):
         attr = self.attr
-        if attr.src and (not attr.src.notFound()):
+        if attr.src and (not attr.src.not_found()):
 
             try:
                 align = attr.align or c.frag.vAlign or "baseline"
@@ -341,7 +341,7 @@ class pisaTagIMG(pisaTag):
                     height = attr.height * dpi96
 
                 img = PmlImage(
-                    attr.src.getData(),
+                    attr.src.get_data(),
                     width=None,
                     height=None)
 
@@ -351,16 +351,16 @@ class pisaTagIMG(pisaTag):
                 img.drawWidth *= dpi96
 
                 if (width is None) and (height is not None):
-                    factor = getSize(height) / img.drawHeight
+                    factor = get_size(height) / img.drawHeight
                     img.drawWidth *= factor
-                    img.drawHeight = getSize(height)
+                    img.drawHeight = get_size(height)
                 elif (height is None) and (width is not None):
-                    factor = getSize(width) / img.drawWidth
+                    factor = get_size(width) / img.drawWidth
                     img.drawHeight *= factor
-                    img.drawWidth = getSize(width)
+                    img.drawWidth = get_size(width)
                 elif (width is not None) and (height is not None):
-                    img.drawWidth = getSize(width)
-                    img.drawHeight = getSize(height)
+                    img.drawWidth = get_size(width)
+                    img.drawHeight = get_size(height)
 
                 img.drawWidth *= img.pisaZoom
                 img.drawHeight *= img.pisaZoom
@@ -424,8 +424,8 @@ class pisaTagIMG(pisaTag):
 
 class pisaTagHR(pisaTag):
     def start(self, c):
-        c.addPara()
-        c.addStory(HRFlowable(
+        c.add_paragraph()
+        c.add_story(HRFlowable(
             color=self.attr.color,
             thickness=self.attr.size,
             width=self.attr.get('width', "100%") or "100%",
@@ -446,7 +446,7 @@ if 0:
             if attr.type == "text":
                 width = 100
                 height = 12
-            c.addStory(xhtml2pdf_reportlab.PmlInput(attr.name,
+            c.add_story(xhtml2pdf_reportlab.PmlInput(attr.name,
                                                     type=attr.type,
                                                     default=attr.value,
                                                     width=width,
@@ -454,16 +454,16 @@ if 0:
             ))
 
         def end(self, c):
-            c.addPara()
+            c.add_paragraph()
             attr = self.attr
             if attr.name:
                 self._render(c, attr)
-            c.addPara()
+            c.add_paragraph()
 
     class pisaTagTEXTAREA(pisaTagINPUT):
 
         def _render(self, c, attr):
-            c.addStory(xhtml2pdf_reportlab.PmlInput(attr.name,
+            c.add_story(xhtml2pdf_reportlab.PmlInput(attr.name,
                                                     default="",
                                                     width=100,
                                                     height=100))
@@ -474,7 +474,7 @@ if 0:
             c.select_options = ["One", "Two", "Three"]
 
         def _render(self, c, attr):
-            c.addStory(xhtml2pdf_reportlab.PmlInput(attr.name,
+            c.add_story(xhtml2pdf_reportlab.PmlInput(attr.name,
                                                     type="select",
                                                     default=c.select_options[0],
                                                     options=c.select_options,
@@ -494,10 +494,10 @@ class pisaTagPDFNEXTPAGE(pisaTag):
 
     def start(self, c):
         # deprecation("pdf:nextpage")
-        c.addPara()
+        c.add_paragraph()
         if self.attr.name:
-            c.addStory(NextPageTemplate(self.attr.name))
-        c.addStory(PageBreak())
+            c.add_story(NextPageTemplate(self.attr.name))
+        c.add_story(PageBreak())
 
 
 class pisaTagPDFNEXTTEMPLATE(pisaTag):
@@ -507,7 +507,7 @@ class pisaTagPDFNEXTTEMPLATE(pisaTag):
 
     def start(self, c):
         # deprecation("pdf:frame")
-        c.addStory(NextPageTemplate(self.attr["name"]))
+        c.add_story(NextPageTemplate(self.attr["name"]))
 
 
 class pisaTagPDFNEXTFRAME(pisaTag):
@@ -516,8 +516,8 @@ class pisaTagPDFNEXTFRAME(pisaTag):
     """
 
     def start(self, c):
-        c.addPara()
-        c.addStory(FrameBreak())
+        c.add_paragraph()
+        c.add_story(FrameBreak())
 
 
 class pisaTagPDFSPACER(pisaTag):
@@ -526,8 +526,8 @@ class pisaTagPDFSPACER(pisaTag):
     """
 
     def start(self, c):
-        c.addPara()
-        c.addStory(Spacer(1, self.attr.height))
+        c.add_paragraph()
+        c.add_story(Spacer(1, self.attr.height))
 
 
 class pisaTagPDFPAGENUMBER(pisaTag):
@@ -537,7 +537,7 @@ class pisaTagPDFPAGENUMBER(pisaTag):
 
     def start(self, c):
         c.frag.pageNumber = True
-        c.addFrag(self.attr.example)
+        c.add_fragment(self.attr.example)
         c.frag.pageNumber = False
 
 
@@ -548,11 +548,11 @@ class pisaTagPDFPAGECOUNT(pisaTag):
 
     def start(self, c):
         c.frag.pageCount = True
-        c.addFrag()
+        c.add_fragment()
         c.frag.pageCount = False
 
     def end(self, c):
-        c.addPageCount()
+        c.add_page_count()
 
 
 class pisaTagPDFTOC(pisaTag):
@@ -562,7 +562,7 @@ class pisaTagPDFTOC(pisaTag):
 
     def end(self, c):
         c.multiBuild = True
-        c.addTOC()
+        c.add_toc()
 
 
 class pisaTagPDFFRAME(pisaTag):
@@ -576,7 +576,7 @@ class pisaTagPDFFRAME(pisaTag):
 
         name = attrs["name"]
         if name is None:
-            name = "frame%d" % c.UID()
+            name = "frame%d" % c.uid()
 
         x, y, w, h = attrs.box
         self.frame = Frame(
@@ -591,17 +591,17 @@ class pisaTagPDFFRAME(pisaTag):
         self.static = False
         if self.attr.static:
             self.static = True
-            c.addPara()
-            self.story = c.swapStory()
+            c.add_paragraph()
+            self.story = c.swap_story()
         else:
             c.frameList.append(self.frame)
 
     def end(self, c):
         if self.static:
-            c.addPara()
+            c.add_paragraph()
             self.frame.pisaStaticStory = c.story
             c.frameStaticList.append(self.frame)
-            c.swapStory(self.story)
+            c.swap_story(self.story)
 
 
 class pisaTagPDFTEMPLATE(pisaTag):
@@ -649,7 +649,7 @@ class pisaTagPDFFONT(pisaTag):
 
     def start(self, c):
         deprecation("pdf:font")
-        c.loadFont(self.attr.name, self.attr.src, self.attr.encoding)
+        c.load_font(self.attr.name, self.attr.src, self.attr.encoding)
 
 
 class pisaTagPDFBARCODE(pisaTag):
@@ -708,7 +708,7 @@ class pisaTagPDFBARCODE(pisaTag):
         checksum = int(attr.checksum)
         barWidth = attr.barwidth or 0.01 * inch
         barHeight = attr.barheight or 0.5 * inch
-        fontName = c.getFontName("OCRB10,OCR-B,OCR B,OCRB")  # or "Helvetica"
+        fontName = c.get_font_name("OCRB10,OCR-B,OCR B,OCRB")  # or "Helvetica"
         fontSize = attr.fontsize or 2.75 * mm
 
         # Assure minimal size.

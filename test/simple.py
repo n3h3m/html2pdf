@@ -123,7 +123,7 @@ def testURL(
         log_warn = 1,
         log_err = 1,
         path = url,
-        link_callback = pisa.pisaLinkLoader(url).getFileName
+        link_callback = pisa.PisaLinkLoader(url).get_file_name
         )
 
     dumpErrors(pdf)

@@ -25,7 +25,7 @@ from reportlab.platypus.flowables import Flowable, CondPageBreak, \
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import Table, TableStyle
 from xhtml2pdf.reportlab_paragraph import Paragraph
-from xhtml2pdf.util import getUID, getBorderStyle
+from xhtml2pdf.util import get_uid, get_border_style
 
 import sys
 
@@ -604,7 +604,7 @@ class PmlParagraph(Paragraph, PmlMaxHeightMixIn):
             last = getattr(self.canv, "outlineLast", - 1) + 1
             while last < self.outlineLevel:
                 # print "(OUTLINE",  last, self.text
-                key = getUID()
+                key = get_uid()
                 self.canv.bookmarkPage(key)
                 self.canv.addOutlineEntry(
                     self.text,
@@ -614,7 +614,7 @@ class PmlParagraph(Paragraph, PmlMaxHeightMixIn):
                 last += 1
             self.canv.outlineLast = self.outlineLevel
 
-            key = getUID()
+            key = get_uid()
 
             self.canv.bookmarkPage(key)
             self.canv.addOutlineEntry(
@@ -667,7 +667,7 @@ class PmlParagraph(Paragraph, PmlMaxHeightMixIn):
 
         def _drawBorderLine(bstyle, width, color, x1, y1, x2, y2):
             # We need width and border style to be able to draw a border
-            if width and getBorderStyle(bstyle):
+            if width and get_border_style(bstyle):
                 # If no color for border is given, the text color is used (like defined by W3C)
                 if color is None:
                     color = style.textColor

@@ -1,22 +1,4 @@
 # -*- coding: utf-8 -*-
-from xhtml2pdf.default import DEFAULT_CSS
-from xhtml2pdf.document import pisaDocument
-from xhtml2pdf.util import getFile
-from xhtml2pdf.version import VERSION, VERSION_STR
-import getopt
-import glob
-import logging
-import os
-import sys
-import tempfile
-try:
-    import urllib2
-except ImportError:
-    import urllib.request as urllib2
-try:
-    import urlparse
-except ImportError:
-    import urllib.parse as urlparse
 # Copyright 2010 Dirk Holtwick, holtwick.it
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +12,27 @@ except ImportError:
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import getopt
+import glob
+import logging
+import os
+import sys
+import tempfile
+
+from xhtml2pdf.default import DEFAULT_CSS
+from xhtml2pdf.document import pisaDocument
+from xhtml2pdf.util import get_file
+from xhtml2pdf.version import VERSION, VERSION_STR
+
+try:
+    import urllib2
+except ImportError:
+    import urllib.request as urllib2
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 
 log = logging.getLogger("xhtml2pdf")
 
@@ -92,10 +95,10 @@ LOG_FORMAT_DEBUG = "%(levelname)s [%(name)s] %(pathname)s line %(lineno)d: %(mes
 
 
 def usage():
-    print (USAGE)
+    print(USAGE)
 
 
-class pisaLinkLoader:
+class PisaLinkLoader:
     """
     Helper to load page from an URL and load corresponding
     files to temporary files. If getFileName is called it
@@ -112,7 +115,7 @@ class pisaLinkLoader:
         for path in self.tfileList:
             os.remove(path)
 
-    def getFileName(self, name, relative=None):
+    def get_file_name(self, name, relative=None):
         url = urlparse.urljoin(relative or self.src, name)
         path = urlparse.urlsplit(url)[2]
         suffix = ""
@@ -122,7 +125,7 @@ class pisaLinkLoader:
                 suffix = new_suffix
         path = tempfile.mktemp(prefix="pisa-", suffix=suffix)
         ufile = urllib2.urlopen(url)
-        tfile = file(path, "wb")
+        tfile = open(path, "wb")
         while True:
             data = ufile.read(1024)
             if not data:
@@ -133,7 +136,7 @@ class pisaLinkLoader:
         self.tfileList.append(path)
 
         if not self.quiet:
-            print ("  Loading", url, "to", path)
+            print("  Loading", url, "to", path)
 
         return path
 
@@ -252,7 +255,7 @@ def execute():
 
         if o in ("-c", "--css"):
             # CSS
-            css = file(a, "r").read()
+            css = open(a, "r").read()
 
         if o in ("--css-dump",):
             # CSS dump
@@ -310,7 +313,7 @@ def execute():
         else:
             if src.startswith("http:") or src.startswith("https:"):
                 wpath = src
-                fsrc = getFile(src).getFile()
+                fsrc = get_file(src).get_file()
                 src = "".join(urlparse.urlsplit(src)[1:3]).replace("/", "-")
             else:
                 fsrc = wpath = os.path.abspath(src)
@@ -321,7 +324,7 @@ def execute():
             if dest_part.lower().endswith(".html") or dest_part.lower().endswith(".htm"):
                 dest_part = ".".join(src.split(".")[:-1])
             dest = dest_part + "." + format.lower()
-            for i in xrange(10):
+            for i in range(10):
                 try:
                     open(dest, "wb").close()
                     break
@@ -413,7 +416,7 @@ def showLogging(debug=False):
 # Background informations in data URI here:
 # http://en.wikipedia.org/wiki/Data_URI_scheme
 
-def makeDataURI(data=None, mimetype=None, filename=None):
+def make_data_uri(data=None, mimetype=None, filename=None):
     import base64
 
     if not mimetype:
@@ -427,9 +430,9 @@ def makeDataURI(data=None, mimetype=None, filename=None):
     return "data:" + mimetype + ";base64," + "".join(base64.encodestring(data).split())
 
 
-def makeDataURIFromFile(filename):
+def make_data_uri_from_file(filename):
     data = open(filename, "rb").read()
-    return makeDataURI(data, filename=filename)
+    return make_data_uri(data, filename=filename)
 
 
 if __name__ == "__main__":

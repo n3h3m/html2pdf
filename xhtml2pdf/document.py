@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from xhtml2pdf.context import pisaContext
+from xhtml2pdf.context import PisaContext
 from xhtml2pdf.default import DEFAULT_CSS
 from xhtml2pdf.parser import pisaParser
 from reportlab.platypus.flowables import Spacer
 from reportlab.platypus.frames import Frame
 from xhtml2pdf.xhtml2pdf_reportlab import PmlBaseDoc, PmlPageTemplate
-from xhtml2pdf.util import pisaTempFile, getBox, PyPDF2
+from xhtml2pdf.util import PisaTempFile, get_box, PyPDF2
 import cgi
 import logging
 
@@ -27,7 +27,7 @@ log = logging.getLogger("xhtml2pdf")
 
 
 def pisaErrorDocument(dest, c):
-    out = pisaTempFile(capacity=c.capacity)
+    out = PisaTempFile(capacity=c.capacity)
     out.write("<p style='background-color:red;'><strong>%d error(s) occured:</strong><p>" % c.err)
     for mode, line, msg, _ in c.log:
         if mode == "error":
@@ -46,7 +46,7 @@ def pisaStory(src, path=None, link_callback=None, debug=0, default_css=None,
               **kw):
     # Prepare Context
     if not context:
-        context = pisaContext(path, debug=debug)
+        context = PisaContext(path, debug=debug)
         context.pathCallback = link_callback
 
     # Use a default set of CSS definitions to get an expected output
@@ -81,7 +81,7 @@ def pisaDocument(src, dest=None, path=None, link_callback=None, debug=0,
               xhtml)
 
     # Prepare simple context
-    context = pisaContext(path, debug=debug, capacity=capacity)
+    context = PisaContext(path, debug=debug, capacity=capacity)
     context.pathCallback = link_callback
 
     # Build story
@@ -89,7 +89,7 @@ def pisaDocument(src, dest=None, path=None, link_callback=None, debug=0,
                         encoding, context=context, xml_output=xml_output)
 
     # Buffer PDF into memory
-    out = pisaTempFile(capacity=context.capacity)
+    out = PisaTempFile(capacity=context.capacity)
 
     doc = PmlBaseDoc(
         out,
@@ -107,7 +107,7 @@ def pisaDocument(src, dest=None, path=None, link_callback=None, debug=0,
         body = context.templateList["body"]
         del context.templateList["body"]
     else:
-        x, y, w, h = getBox("1cm 1cm -1cm -1cm", context.pageSize)
+        x, y, w, h = get_box("1cm 1cm -1cm -1cm", context.pageSize)
         body = PmlPageTemplate(
             id="body",
             frames=[
@@ -141,9 +141,9 @@ def pisaDocument(src, dest=None, path=None, link_callback=None, debug=0,
                 # see bgouter at line 137
                 for bg in context.pisaBackgroundList:
                     page = input1.getPage(ctr)
-                    if (bg and not bg.notFound()
+                    if (bg and not bg.not_found()
                         and (bg.mimetype == "application/pdf")):
-                        bginput = PyPDF2.PdfFileReader(bg.getFile())
+                        bginput = PyPDF2.PdfFileReader(bg.get_file())
                         pagebg = bginput.getPage(0)
                         pagebg.mergePage(page)
                         page = pagebg
@@ -152,7 +152,7 @@ def pisaDocument(src, dest=None, path=None, link_callback=None, debug=0,
                             "Background PDF %s doesn't exist.", bg))
                     output.addPage(page)
                     ctr += 1
-                out = pisaTempFile(capacity=context.capacity)
+                out = PisaTempFile(capacity=context.capacity)
                 output.write(out)
                 # data = sout.getvalue()
                 # Found a background? So leave loop after first occurence
@@ -165,7 +165,7 @@ def pisaDocument(src, dest=None, path=None, link_callback=None, debug=0,
 
     if dest is None:
         # No output file was passed - Let's use a pisaTempFile
-        dest = pisaTempFile(capacity=context.capacity)
+        dest = PisaTempFile(capacity=context.capacity)
     context.dest = dest
 
     data = out.getvalue()  # TODO: That load all the tempfile in RAM - Why bother with a swapping tempfile then?

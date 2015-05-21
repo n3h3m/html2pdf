@@ -1,6 +1,6 @@
 import unittest
 from xhtml2pdf.parser import pisaParser
-from xhtml2pdf.context import pisaContext
+from xhtml2pdf.context import PisaContext
 
 _data = b"""
 <!doctype html>
@@ -16,18 +16,18 @@ BODY
 class TestCase(unittest.TestCase):
 
     def testParser(self):
-        c = pisaContext(".")
+        c = PisaContext(".")
         r = pisaParser(_data, c)
         self.assertEqual(c, r)
 
     def test_getFile(self):
-        c = pisaContext(".")
+        c = PisaContext(".")
         r = pisaParser(_data, c)
-        self.assertEqual(c.getFile(None), None)
+        self.assertEqual(c.get_file(None), None)
 
     def test_height_as_list(self):
         """Asserts attributes like 'height: 10px !important" are parsed"""
-        c = pisaContext(".")
+        c = PisaContext(".")
         data = b"<p style='height: 10px !important;width: 10px !important'>test</p>"
         r = pisaParser(data, c)
         self.assertEqual(c, r)
