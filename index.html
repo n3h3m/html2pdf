@@ -1,0 +1,194 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Html2pdf by zulumarketing</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Html2pdf</h1>
+        <p>Pure Python HTML/CSS to PDF converter</p>
+
+        <p class="view"><a href="https://github.com/zulumarketing/html2pdf">View the Project on GitHub <small>zulumarketing/html2pdf</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/zulumarketing/html2pdf/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/zulumarketing/html2pdf/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/zulumarketing/html2pdf">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <hr>
+
+<p>xhtml2pdf</p>
+
+<hr>
+
+<p>HTML/CSS to PDF converter based on Python</p>
+
+<h1>
+<a id="about" class="anchor" href="#about" aria-hidden="true"><span class="octicon octicon-link"></span></a>About</h1>
+
+<p><code>xhtml2pdf</code> is a html2pdf converter using the ReportLab Toolkit,
+the HTML5lib and pyPdf. It supports HTML 5 and CSS 2.1 (and some of CSS 3).
+It is completely written in pure Python so it is platform independent.</p>
+
+<p>The main benefit of this tool that a user with Web skills like HTML and CSS
+is able to generate PDF templates very quickly without learning new
+technologies.</p>
+
+<h1>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h1>
+
+<h1>
+<a id="-reportlab-toolkit-22-httpwwwreportlaborg_" class="anchor" href="#-reportlab-toolkit-22-httpwwwreportlaborg_" aria-hidden="true"><span class="octicon octicon-link"></span></a>. <code>Reportlab Toolkit 2.2+ &lt;http://www.reportlab.org/&gt;</code>_</h1>
+
+<h1>
+<a id="-html5lib-0111-httpcodegooglecomphtml5lib_" class="anchor" href="#-html5lib-0111-httpcodegooglecomphtml5lib_" aria-hidden="true"><span class="octicon octicon-link"></span></a>. <code>html5lib 0.11.1+ &lt;http://code.google.com/p/html5lib/&gt;</code>_</h1>
+
+<h1>
+<a id="-pypdf2-119-optional-httpspypipythonorgpypipypdf2_" class="anchor" href="#-pypdf2-119-optional-httpspypipythonorgpypipypdf2_" aria-hidden="true"><span class="octicon octicon-link"></span></a>. <code>PyPDF2 1.19+ (optional) &lt;https://pypi.python.org/pypi/PyPDF2&gt;</code>_</h1>
+
+<p>All requirements are listed in <code>requirements.txt</code> file.</p>
+
+<h1>
+<a id="development-environment" class="anchor" href="#development-environment" aria-hidden="true"><span class="octicon octicon-link"></span></a>Development environment</h1>
+
+<h2>
+<a id="python-virtualenv-and-dependencies" class="anchor" href="#python-virtualenv-and-dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Python, virtualenv and dependencies</h2>
+
+<ol>
+<li><p>Install Python 2.6.x or 2.7.x. Installation steps depends on your operating system.</p></li>
+<li>
+<p>Install Pip, the python package installer::</p>
+
+<p>sudo easy_install pip</p>
+
+<p>For more information about <code>pip</code> refer to <a href="http://www.pip-installer.org/">http://www.pip-installer.org/</a>.</p>
+</li>
+<li>
+<p>I will recommend using <code>virtualenv</code> for development. This is great to have separate environment for
+each project, keeping the dependencies for multiple projects separated::</p>
+
+<p>sudo pip install virtualenv</p>
+
+<p>For more information about <code>virtualenv</code> refer to <a href="http://www.virtualenv.org/">http://www.virtualenv.org/</a></p>
+</li>
+<li>
+<p>Create virtualenv for the project. This can be inside the project directory, but cannot be under
+version control::</p>
+
+<p>virtualenv --distribute xhtml2pdfenv --python=python2</p>
+</li>
+<li>
+<p>Activate your virtualenv::</p>
+
+<p>source xhtml2pdfenv/bin/activate</p>
+
+<p>Later to deactivate use::</p>
+
+<p>deactivate</p>
+</li>
+<li>
+<p>Next step will be to install/upgrade dependencies from <code>requirements.txt</code> file::</p>
+
+<p>pip install -r requirements.txt</p>
+</li>
+<li>
+<p>Run tests to check your configuration::</p>
+
+<p>nosetests --with-coverage</p>
+
+<p>You should have a log with success status::</p>
+
+<p>Ran 36 tests in 0.322s</p>
+
+<p>OK</p>
+</li>
+</ol>
+
+<h1>
+<a id="python-integration" class="anchor" href="#python-integration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Python integration</h1>
+
+<p>Some simple demos of how to integrate xhtml2pdf into
+a Python program may be found here: test/simple.py</p>
+
+<h1>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h1>
+
+<p>Development for this software happend on github, and the main fork is
+currently at <a href="https://github.com/chrisglass/xhtml2pdf">https://github.com/chrisglass/xhtml2pdf</a></p>
+
+<p>Contributions are welcome in any format, but using github's pull request
+system is very highly preferred since it makes review and integration
+much easier.</p>
+
+<h1>
+<a id="running-tests" class="anchor" href="#running-tests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running tests</h1>
+
+<p>Two different test suites are available to assert xhtml2pdf works reliably:</p>
+
+<h1>
+<a id="-unit-tests-the-unit-testing-framework-is-currently-minimal-but-is-being" class="anchor" href="#-unit-tests-the-unit-testing-framework-is-currently-minimal-but-is-being" aria-hidden="true"><span class="octicon octicon-link"></span></a>. Unit tests. The unit testing framework is currently minimal, but is being</h1>
+
+<p>improved on a daily basis (contributions welcome). They should run in the
+   expected way for Python's unittest module, i.e.::</p>
+
+<pre><code>    nosetests --with-coverage (or your personal favorite)
+</code></pre>
+
+<h1>
+<a id="-functional-tests-thanks-to-mawe42s-super-cool-work-a-full-functional" class="anchor" href="#-functional-tests-thanks-to-mawe42s-super-cool-work-a-full-functional" aria-hidden="true"><span class="octicon octicon-link"></span></a>. Functional tests. Thanks to mawe42's super cool work, a full functional</h1>
+
+<p>test suite lives in testrender/.</p>
+
+<h1>
+<a id="contact" class="anchor" href="#contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contact</h1>
+
+<ul>
+<li>IRC: #xhtml2pdf on freenode</li>
+<li>Mailing list: <a href="mailto:xhtml2pdf@googlegroups.com">xhtml2pdf@googlegroups.com</a>
+</li>
+<li>Google group: <a href="http://groups.google.com/group/xhtml2pdf">http://groups.google.com/group/xhtml2pdf</a>
+</li>
+</ul>
+
+<p>Maintainer: Chris Glass <a href="mailto:tribaal@gmail.com">tribaal@gmail.com</a></p>
+
+<h1>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h1>
+
+<p>Copyright 2010 Dirk Holtwick, holtwick.it</p>
+
+<p>Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+
+<pre><code>http://www.apache.org/licenses/LICENSE-2.0
+</code></pre>
+
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/zulumarketing">zulumarketing</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
