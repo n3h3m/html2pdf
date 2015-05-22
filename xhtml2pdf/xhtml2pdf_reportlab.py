@@ -58,7 +58,7 @@ class PTCycle(list):
     def __init__(self):
         self._restart = 0
         self._idx = 0
-        list.__init__(self)
+        super(list, self).__init__()
 
     def cyclicIterator(self):
         while 1:
@@ -68,7 +68,7 @@ class PTCycle(list):
                 self._idx = self._restart
 
 
-class PmlMaxHeightMixIn:
+class PmlMaxHeightMixIn(object):
     def setMaxHeight(self, availHeight):
         self.availHeightValue = availHeight
         if availHeight < 70000:
@@ -95,9 +95,7 @@ class PmlBaseDoc(BaseDocTemplate):
     We use our own document template to get access to the canvas
     and set some informations once.
     """
-
     def beforePage(self):
-
         # Tricky way to set producer, because of not real privateness in Python
         info = "pisa HTML to PDF <http://www.htmltopdf.org>"
         self.canv._doc.info.producer = info
@@ -134,9 +132,9 @@ class PmlBaseDoc(BaseDocTemplate):
                 self.page))
 
     def handle_nextPageTemplate(self, pt):
-        '''
+        """
         if pt has also templates for even and odd page convert it to list
-        '''
+        """
         has_left_template = self._has_template_for_name(pt + '_left')
         has_right_template = self._has_template_for_name(pt + '_right')
 
@@ -156,12 +154,12 @@ class PmlBaseDoc(BaseDocTemplate):
             if hasattr(self, '_nextPageTemplateCycle'):
                 del self._nextPageTemplateCycle
             self._nextPageTemplateIndex = pt
-        elif type(pt) in (list, tuple):
-            #used for alternating left/right pages
-            #collect the refs to the template objects, complain if any are bad
+        elif isinstance(pt, (list, tuple)):
+            # used for alternating left/right pages
+            # collect the refs to the template objects, complain if any are bad
             c = PTCycle()
             for ptn in pt:
-            #special case name used to short circuit the iteration
+                # special case name used to short circuit the iteration
                 if ptn == '*':
                     c._restart = len(c)
                     continue
@@ -174,7 +172,7 @@ class PmlBaseDoc(BaseDocTemplate):
             elif c._restart > len(c):
                 raise ValueError("Invalid cycle restart position")
 
-            #ensure we start on the first one$
+            # ensure we start on the first one$
             self._nextPageTemplateCycle = c.cyclicIterator()
         else:
             raise TypeError("Argument pt should be string or integer or list")

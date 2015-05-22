@@ -847,7 +847,7 @@ class CSSBuilder(cssParser.CSSBuilderAbstract):
 
 
     def specialRules(self, declarations):
-        return cssSpecial.parseSpecialRules(declarations)
+        return cssSpecial.parse_special_rules(declarations)
 
 
     def inline(self, declarations):

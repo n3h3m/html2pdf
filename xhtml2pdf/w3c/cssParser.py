@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~ Copyright (C) 2002-2004  TechGame Networks, LLC.
@@ -10,7 +9,9 @@
 #  Modified by Dirk Holtwick <holtwick@web.de>, 2007-2008
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-"""CSS-2.1 parser.
+"""
+CSS-2.1 parser
+~~~~~~~~~~~~~~
 
 The CSS 2.1 Specification this parser was derived from can be found at http://www.w3.org/TR/CSS21/
 
@@ -29,21 +30,11 @@ Dependencies:
     re
 """
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~ Imports
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 import re
 import six
 
-try:
-    from . import cssSpecial  # python 3
-except Exception:
-    import cssSpecial  # python 2
+from xhtml2pdf.w3c.cssSpecial import cleanup_css
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~ Definitions
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def is_at_rule_ident(src, ident):
     """
@@ -413,7 +404,7 @@ class CSSParser(object):
         assert isinstance(src, six.text_type), "'src' must be text!"
         try:
             # XXX Some simple preprocessing
-            src = cssSpecial.cleanupCSS(src)
+            src = cleanup_css(src)
             try:
                 src, stylesheet = self._parse_stylesheet(src)
             except self.ParseError as err:

@@ -25,8 +25,9 @@ import tempfile
 import gzip
 
 from functools import wraps
+from io import UnsupportedOperation
 
-from six import binary_type, BytesIO, StringIO
+from six import binary_type, StringIO
 
 from reportlab.lib.colors import Color, toColor
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
@@ -413,50 +414,33 @@ class PisaTempFile(object):
     Deprecated: Callers should use `SpooledTemporaryFile()` directly.
     """
 
-    def __init__(self, buffer=None, **kwargs):
+    def __init__(self, buffer=None, mode="wb+", **kwargs):
         """
         Creates a TempFile object containing the specified buffer. If capacity is specified, we use a real temporary
         file once the file gets larger than that size. Otherwise, the data is stored in memory.
         """
         if buffer is None:
-            self._delegate = tempfile.SpooledTemporaryFile()
+            self._delegate = tempfile.SpooledTemporaryFile(mode=mode)
         else:
-            self._delegate = tempfile.SpooledTemporaryFile(buffer)
+            self._delegate = tempfile.SpooledTemporaryFile(buffer, mode=mode)
 
-    def get_file_name(self):
+    @property
+    def name(self):
         """
         Get a named temporary file
         """
 
         self._delegate.rollover()
-        return self.name
-
-    def fileno(self):
-        """
-        Forces this buffer to use a temporary file as the underlying.
-        object and returns the fileno associated with it.
-        """
-        return self._delegate.fileno()
+        return str(self._delegate.name)
 
     def getvalue(self):
         """
-        Get value of file. Work around for second strategy. Always returns bytes
-        """
-        self._delegate.flush()
-        self._delegate.seek(0)
-        value = self._delegate.read()
-        if not isinstance(value, binary_type):
-            value = value.encode('utf-8')
-        return value
+        Get value of file.
 
-    def write(self, value):
+        Work around to keep the strange properties of this object.
         """
-        If capacity != -1 and length of file > capacity it is time to switch
-        """
-        if not isinstance(value, binary_type):
-            value = value.encode('utf-8')
-        print(type(value))
-        self._delegate.write(value)
+        self._delegate.seek(0)
+        return self._delegate.read()
 
     def __getattr__(self, name):
         try:
@@ -467,14 +451,11 @@ class PisaTempFile(object):
             raise AttributeError(e)
 
 
-_rx_datauri = re.compile("^data:(?P<mime>[a-z]+/[a-z]+);base64,(?P<data>.*)$", re.M | re.DOTALL)
-
-
 class PisaFileObject:
-
     """
     XXX
     """
+    _rx_datauri = re.compile("^data:(?P<mime>[a-z]+/[a-z]+);base64,(?P<data>.*)$", re.M | re.DOTALL)
 
     def __init__(self, uri, basepath=None):
         self.basepath = basepath
@@ -491,7 +472,7 @@ class PisaFileObject:
 
         # Data URI
         if uri.startswith("data:"):
-            m = _rx_datauri.match(uri)
+            m = self._rx_datauri.match(uri)
             self.mimetype = m.group("mime")
             self.data = base64.decodestring(m.group("data"))
 
@@ -507,11 +488,11 @@ class PisaFileObject:
             if urlParts.scheme == 'file':
                 if basepath and uri.startswith('/'):
                     uri = urlparse.urljoin(basepath, uri[1:])
-                urlResponse = urlopen(uri)
-                self.mimetype = urlResponse.info().get(
+                url_response = urlopen(uri)
+                self.mimetype = url_response.info().get(
                     "Content-Type", '').split(";")[0]
-                self.uri = urlResponse.geturl()
-                self.file = urlResponse
+                self.uri = url_response.geturl()
+                self.file = url_response
 
             # Drive letters have len==1 but we are looking
             # for things like http:
@@ -544,13 +525,13 @@ class PisaFileObject:
                         self.file = r1
                 else:
                     try:
-                        urlResponse = urlopen(uri)
+                        url_response = urlopen(uri)
                     except HTTPError:
                         return
-                    self.mimetype = urlResponse.info().get(
+                    self.mimetype = url_response.info().get(
                         "Content-Type", '').split(";")[0]
-                    self.uri = urlResponse.geturl()
-                    self.file = urlResponse
+                    self.uri = url_response.geturl()
+                    self.file = url_response
 
             else:
 

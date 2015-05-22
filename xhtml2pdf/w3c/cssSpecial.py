@@ -48,7 +48,7 @@ import logging
 log = logging.getLogger("ho.css")
 
 
-def toList(value):
+def to_list(value):
     if type(value) != ListType:
         return [value]
     return value
@@ -151,7 +151,7 @@ _relSizeTable = {
 '''
 
 
-def getNextPart(parts):
+def get_next_part(parts):
     if parts:
         part = parts.pop(0)
     else:
@@ -159,11 +159,11 @@ def getNextPart(parts):
     return part
 
 
-def isSize(value):
+def is_size(value):
     return value and ((type(value) is TupleType) or value == "0")
 
 
-def splitBorder(parts):
+def split_border(parts):
     """
     The order of the elements seems to be of no importance:
 
@@ -179,7 +179,7 @@ def splitBorder(parts):
 
     for part in parts:
         # Width
-        if isSize(part):
+        if is_size(part):
             width = part
             # part = getNextPart(parts)
 
@@ -194,10 +194,10 @@ def splitBorder(parts):
 
     # log.debug("Border styles: %r -> %r ", copy_parts, (width, style, color))
 
-    return (width, style, color)
+    return width, style, color
 
 
-def parseSpecialRules(declarations, debug=0):
+def parse_special_rules(declarations, debug=0):
     # print selectors, declarations
     # CSS MODIFY!
     dd = []
@@ -209,25 +209,25 @@ def parseSpecialRules(declarations, debug=0):
 
         name, parts, last = d
         oparts = parts
-        parts = toList(parts)
+        parts = to_list(parts)
 
         # FONT
         if name == "font":
             # [ [ <'font-style'> || <'font-variant'> || <'font-weight'> ]? <'font-size'> [ / <'line-height'> ]? <'font-family'> ] | inherit
             ddlen = len(dd)
-            part = getNextPart(parts)
+            part = get_next_part(parts)
             # Style
             if part and part in _styleTable:
                 dd.append(("font-style", part, last))
-                part = getNextPart(parts)
+                part = get_next_part(parts)
                 # Variant
             if part and part in _variantTable:
                 dd.append(("font-variant", part, last))
-                part = getNextPart(parts)
+                part = get_next_part(parts)
                 # Weight
             if part and part in _weightTable:
                 dd.append(("font-weight", part, last))
-                part = getNextPart(parts)
+                part = get_next_part(parts)
                 # Size and Line Height
             if isinstance(part, tuple) and len(part) == 3:
                 fontSize, slash, lineHeight = part
@@ -244,7 +244,7 @@ def parseSpecialRules(declarations, debug=0):
             # [<'background-color'> || <'background-image'> || <'background-repeat'> || <'background-attachment'> || <'background-position'>] | inherit
 
             # XXX We do not receive url() and parts list, so we go for a dirty work arround
-            part = getNextPart(parts) or oparts
+            part = get_next_part(parts) or oparts
             if part:
 
                 if hasattr(part, '__iter__') and (type("." in part) or ("data:" in part)):
@@ -253,12 +253,12 @@ def parseSpecialRules(declarations, debug=0):
                     dd.append(("background-color", part, last))
 
             if 0:
-                part = getNextPart(parts) or oparts
+                part = get_next_part(parts) or oparts
                 print ("~", part, parts, oparts, declarations)
                 # Color
                 if part and (not part.startswith("url")):
                     dd.append(("background-color", part, last))
-                    part = getNextPart(parts)
+                    part = get_next_part(parts)
                     # Background
                 if part:
                     dd.append(("background-image", part, last))
@@ -381,7 +381,7 @@ def parseSpecialRules(declarations, debug=0):
 
         # BORDER
         elif name == "border":
-            width, style, color = splitBorder(parts)
+            width, style, color = split_border(parts)
             if width is not None:
                 dd.append(("border-left-width", width, last))
                 dd.append(("border-right-width", width, last))
@@ -401,7 +401,7 @@ def parseSpecialRules(declarations, debug=0):
         # BORDER TOP, BOTTOM, LEFT, RIGHT
         elif name in ("border-top", "border-bottom", "border-left", "border-right"):
             direction = name[7:]
-            width, style, color = splitBorder(parts)
+            width, style, color = split_border(parts)
             # print direction, width
             if width is not None:
                 dd.append(("border-" + direction + "-width", width, last))
@@ -417,9 +417,9 @@ def parseSpecialRules(declarations, debug=0):
     if debug and dd:
         log.debug("CSS special OUT:\n%s", "\n".join([repr(d) for d in dd]))
 
-    if 0: #declarations!=dd:
-        print ("###", declarations)
-        print ("#->", dd)
+    if 0:  # declarations!=dd:
+        print("###", declarations)
+        print("#->", dd)
         # CSS MODIFY! END
     return dd
 
@@ -427,6 +427,6 @@ def parseSpecialRules(declarations, debug=0):
 #import re
 #_rxhttp = re.compile(r"url\([\'\"]?http\:\/\/[^\/]", re.IGNORECASE|re.DOTALL)
 
-def cleanupCSS(src):
+def cleanup_css(src):
     # src = _rxhttp.sub('url(', src)
     return src

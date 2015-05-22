@@ -17,6 +17,8 @@
 import cgi
 import logging
 
+from tempfile import NamedTemporaryFile, SpooledTemporaryFile
+
 from xhtml2pdf.context import PisaContext
 from xhtml2pdf.default import DEFAULT_CSS
 from xhtml2pdf.parser import pisaParser
@@ -81,7 +83,7 @@ def pisa_document(src, dest=None, path=None, link_callback=None, debug=0, defaul
                          context=PisaContext(path, debug=debug, capacity=capacity), xml_output=xml_output)
 
     # Buffer PDF into memory
-    out = PisaTempFile(capacity=context.capacity)
+    out = NamedTemporaryFile()
     doc = PmlBaseDoc(out,
                      pagesize=context.pageSize,
                      author=context.meta["author"].strip(),
@@ -125,18 +127,16 @@ def pisa_document(src, dest=None, path=None, link_callback=None, debug=0, defaul
                 # see bgouter at line 137
                 for bg in context.pisaBackgroundList:
                     page = input1.getPage(ctr)
-                    if (bg and not bg.not_found()
-                        and (bg.mimetype == "application/pdf")):
+                    if bg and not bg.not_found() and bg.mimetype == "application/pdf":
                         bginput = PyPDF2.PdfFileReader(bg.get_file())
                         pagebg = bginput.getPage(0)
                         pagebg.mergePage(page)
                         page = pagebg
                     else:
-                        log.warn(context.warning(
-                            "Background PDF %s doesn't exist.", bg))
+                        log.warn(context.warning("Background PDF %s doesn't exist.", bg))
                     output.addPage(page)
                     ctr += 1
-                out = PisaTempFile(capacity=context.capacity)
+                out = NamedTemporaryFile()
                 output.write(out)
                 # data = sout.getvalue()
                 # Found a background? So leave loop after first occurence
@@ -145,12 +145,8 @@ def pisa_document(src, dest=None, path=None, link_callback=None, debug=0, defaul
         log.warn(context.warning("PyPDF2 not installed!"))
     # Get the resulting PDF and write it to the file object
     # passed from the caller
-    if dest is None:
-        # No output file was passed - Let's use a pisaTempFile
-        dest = PisaTempFile(capacity=context.capacity)
-    context.dest = dest
-
-    data = out.getvalue()  # TODO: That load all the tempfile in RAM - Why bother with a swapping tempfile then?
-    context.dest.write(data)  # TODO: context.dest is a tempfile as well...
-
+    context.dest = NamedTemporaryFile()
+    if dest is not None:
+        context.dest.write(dest.getvalue().encode())
+    context.dest.write(out.file.read())  # TODO: context.dest is a tempfile as well...
     return context
