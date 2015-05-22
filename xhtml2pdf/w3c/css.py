@@ -407,27 +407,27 @@ class CSSMutableSelector(CSSSelectorBase, cssParser.CSSSelectorAbstract):
         self._addQualifier(CSSSelectorCombinationQualifier(op, other))
 
 
-    def addHashId(self, hashId):
+    def add_hash_id(self, hashId):
         self._addQualifier(CSSSelectorHashQualifier(hashId))
 
 
-    def addClass(self, class_):
+    def add_class(self, class_):
         self._addQualifier(CSSSelectorClassQualifier(class_))
 
 
-    def addAttribute(self, attrName):
+    def add_attribute(self, attrName):
         self._addQualifier(CSSSelectorAttributeQualifier(attrName))
 
 
-    def addAttributeOperation(self, attrName, op, attrValue):
+    def add_attribute_operation(self, attrName, op, attrValue):
         self._addQualifier(CSSSelectorAttributeQualifier(attrName, op, attrValue))
 
 
-    def addPseudo(self, name):
+    def add_pseudo(self, name):
         self._addQualifier(CSSSelectorPseudoQualifier(name))
 
 
-    def addPseudoFunction(self, name, params):
+    def add_pseudo_function(self, name, params):
         self._addQualifier(CSSSelectorPseudoQualifier(name, params))
 
 
@@ -809,11 +809,11 @@ class CSSBuilder(cssParser.CSSBuilderAbstract):
 
     #~ css results ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def beginStylesheet(self):
+    def begin_stylesheet(self):
         self._pushState()
 
 
-    def endStylesheet(self):
+    def end_stylesheet(self):
         self._popState()
 
 
@@ -838,11 +838,11 @@ class CSSBuilder(cssParser.CSSBuilderAbstract):
             return result
 
 
-    def beginInline(self):
+    def begin_inline(self):
         self._pushState()
 
 
-    def endInline(self):
+    def end_inline(self):
         self._popState()
 
 
@@ -879,7 +879,7 @@ class CSSBuilder(cssParser.CSSBuilderAbstract):
 
     #~ css namespaces ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def resolveNamespacePrefix(self, nsPrefix, name):
+    def resolve_namespace_prefix(self, nsPrefix, name):
         if nsPrefix == '*':
             return (nsPrefix, '*', name)
         xmlns = self.namespaces.get(nsPrefix, None)
@@ -889,21 +889,21 @@ class CSSBuilder(cssParser.CSSBuilderAbstract):
 
     #~ css @ directives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def atCharset(self, charset):
+    def at_charset(self, charset):
         self.charset = charset
 
 
-    def atImport(self, import_, mediums, cssParser):
+    def at_import(self, import_, mediums, cssParser):
         if self.isValidMedium(mediums):
             return cssParser.parseExternal(import_)
         return None
 
 
-    def atNamespace(self, nsprefix, uri):
+    def at_namespace(self, nsprefix, uri):
         self.namespaces[nsprefix] = uri
 
 
-    def atMedia(self, mediums, ruleset):
+    def at_media(self, mediums, ruleset):
         if self.isValidMedium(mediums):
             return ruleset
         return None
@@ -923,7 +923,7 @@ class CSSBuilder(cssParser.CSSBuilderAbstract):
         return self.ruleset([self.selector('*')], declarations)
 
 
-    def atIdent(self, atIdent, cssParser, src):
+    def at_ident(self, atIdent, cssParser, src):
         return src, NotImplemented
 
 
@@ -933,7 +933,7 @@ class CSSBuilder(cssParser.CSSBuilderAbstract):
         return self.SelectorFactory(name)
 
 
-    def combineSelectors(self, selectorA, op, selectorB):
+    def combine_selectors(self, selectorA, op, selectorB):
         return self.SelectorFactory.combineSelectors(selectorA, op, selectorB)
 
 
@@ -945,7 +945,7 @@ class CSSBuilder(cssParser.CSSBuilderAbstract):
         return (name, value)
 
 
-    def combineTerms(self, termA, op, termB):
+    def combine_terms(self, termA, op, termB):
         if op in (',', ' '):
             if isinstance(termA, list):
                 termA.append(termB)
@@ -957,42 +957,42 @@ class CSSBuilder(cssParser.CSSBuilderAbstract):
             if isinstance(termA, list):
                 # Bind these "closer" than the list operators -- i.e. work on
                 # the (recursively) last element of the list
-                termA[-1] = self.combineTerms(termA[-1], op, termB)
+                termA[-1] = self.combine_terms(termA[-1], op, termB)
                 return termA
             return self.TermOperatorFactory(termA, op, termB)
 
 
-    def termIdent(self, value):
+    def term_ident(self, value):
         return value
 
 
-    def termNumber(self, value, units=None):
+    def term_number(self, value, units=None):
         if units:
             return value, units
         return value
 
 
-    def termRGB(self, value):
+    def term_rgb(self, value):
         return value
 
 
-    def termURI(self, value):
+    def term_uri(self, value):
         return value
 
 
-    def termString(self, value):
+    def term_string(self, value):
         return value
 
 
-    def termUnicodeRange(self, value):
+    def term_unicode_range(self, value):
         return value
 
 
-    def termFunction(self, name, value):
+    def term_function(self, name, value):
         return self.TermFunctionFactory(name, value)
 
 
-    def termUnknown(self, src):
+    def term_unknown(self, src):
         return src, NotImplemented
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1003,11 +1003,11 @@ class CSSParser(cssParser.CSSParser):
     CSSBuilderFactory = CSSBuilder
 
 
-    def __init__(self, cssBuilder=None, create=True, **kw):
-        if not cssBuilder and create:
-            assert cssBuilder is None
-            cssBuilder = self.createCSSBuilder(**kw)
-        cssParser.CSSParser.__init__(self, cssBuilder)
+    def __init__(self, css_builder=None, create=True, **kw):
+        if not css_builder and create:
+            assert css_builder is None
+            css_builder = self.createCSSBuilder(**kw)
+        cssParser.CSSParser.__init__(self, css_builder)
 
 
     def createCSSBuilder(self, **kw):
@@ -1017,6 +1017,6 @@ class CSSParser(cssParser.CSSParser):
     def parseExternal(self, cssResourceName):
         if os.path.isfile(cssResourceName):
             cssFile = file(cssResourceName, 'r')
-            return self.parseFile(cssFile, True)
+            return self.parse_file(cssFile, True)
         raise RuntimeError("Cannot resolve external CSS file: \"%s\"" % cssResourceName)
 

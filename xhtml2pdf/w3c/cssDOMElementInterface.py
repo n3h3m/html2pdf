@@ -65,7 +65,7 @@ class CSSDOMElementInterface(css.CSSElementInterfaceAbstract):
     def onCSSParserVisit(self, cssParser):
         styleSrc = self.getStyleAttr()
         if styleSrc:
-            style = cssParser.parseInline(styleSrc)
+            style = cssParser.parse_inline(styleSrc)
             self.setInlineStyle(style)
 
 

@@ -205,7 +205,7 @@ def getCSSAttr(self, cssCascade, attrName, default=NotImplemented):
     try:
         style = self.cssStyle
     except:
-        style = self.cssStyle = cssCascade.parser.parseInline(self.cssElement.getStyleAttr() or '')[0]
+        style = self.cssStyle = cssCascade.parser.parse_inline(self.cssElement.getStyleAttr() or '')[0]
     if attrName in style:
         result = style[attrName]
 
